@@ -23,9 +23,6 @@ jobs:
           if [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
             MISSING="$MISSING CLOUDFLARE_ACCOUNT_ID"
           fi
-          if [ -z "${{ secrets.NEXT_PUBLIC_API_URL }}" ]; then
-            MISSING="$MISSING NEXT_PUBLIC_API_URL"
-          fi
           if [ -n "$MISSING" ]; then
             echo "❌ Missing secrets:$MISSING"
             exit 1
@@ -45,10 +42,9 @@ jobs:
       # opennextjs-cloudflare build, not next build: this is what compiles
       # open-next.config.ts and emits .open-next/worker.js, which wrangler.toml
       # points at. A plain next build only produces .next/ and the deploy fails.
+      # NEXT_PUBLIC_API_URL comes from the committed .env.production.
       - name: Build for Cloudflare Workers
         run: npm run pages:build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Upload preview version
         run: npx wrangler versions upload
