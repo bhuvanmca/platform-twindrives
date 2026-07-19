@@ -9,7 +9,7 @@
     "lint": "eslint",
     "pages:build": "opennextjs-cloudflare build",
     "pages:preview": "opennextjs-cloudflare preview",
-    "pages:deploy": "opennextjs-cloudflare deploy"
+    "pages:deploy": "node scripts/guard-windows-deploy.mjs && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
