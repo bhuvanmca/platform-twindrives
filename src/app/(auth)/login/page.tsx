@@ -24,7 +24,9 @@ export default function LoginPage() {
         }
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
+      // auth-service returns { error } on 4xx; keep `message` as a fallback in
+      // case a future endpoint uses it.
+      if (!res.ok) throw new Error(data.error || data.message || "Login failed");
       localStorage.setItem("platform_token", data.token);
       router.push("/colleges");
     } catch (err: unknown) {
