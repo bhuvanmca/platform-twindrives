@@ -75,10 +75,12 @@ done
 All four should be 200. A 500 across the board is the Windows-build signature.
 
 The worker is served from `workers.dev` only — there is no custom domain, and
-`wrangler.toml` declares no routes. `workers_dev` and `preview_urls` are not set
-either, so wrangler enables both by default and warns about it on every deploy.
-If a custom domain is ever added, put it in `wrangler.toml` so it is
-version-controlled rather than dashboard-only.
+`wrangler.toml` declares no routes. `workers_dev` and `preview_urls` are set
+there explicitly: both were already on by default, but stating them keeps the
+production URL out of the hands of a future default change. Note that preview
+URLs are publicly reachable, so a version uploaded by a PR is browsable by
+anyone who has the link. If a custom domain is ever added, put it in
+`wrangler.toml` too, so it is version-controlled rather than dashboard-only.
 
 ## Environment
 
