@@ -7,6 +7,29 @@ supported way to ship is **push to `main`** — CI builds on Linux and runs
 Pull requests upload a preview version (`wrangler versions upload`) and never
 promote it.
 
+## Keep Cloudflare Workers Builds disconnected
+
+The dashboard can also build this repo itself, via Workers & Pages → Settings →
+Builds. **Leave that disconnected.** GitHub Actions is the only pipeline.
+
+Connected, it fails on every push. Workers Builds detects Next.js and runs
+`npm run build`, which is `next build` and emits only `.next/` — but
+`wrangler.toml` points `main` at `.open-next/worker.js`, which nothing but
+`opennextjs-cloudflare build` produces. The deploy step then cannot find its
+entrypoint.
+
+The failing build is the harmless half. The real hazard is that both pipelines
+deploy the *same* worker, so whichever finishes last wins: a slow dashboard
+build can overwrite a newer Actions deploy with older code, silently and
+without failing. Symptom seen on 2026-07-22 — the dashboard showed a red
+*Latest build failed* and an active deployment days older than the last green
+Actions run, while production was in fact serving current code.
+
+If you ever want the dashboard to own deploys instead, set its build command to
+`npm run pages:build` and its deploy command to `npx wrangler deploy`, then
+delete `.github/workflows/deploy.yml` — but that loses the secret validation and
+the Windows guard. Run one or the other, never both.
+
 ## Do not deploy from Windows
 
 `opennextjs-cloudflare` bakes host path separators into the server function, so a
@@ -86,5 +109,6 @@ anyone who has the link. If a custom domain is ever added, put it in
 
 `NEXT_PUBLIC_API_URL` is committed in `.env.production` on purpose — `NEXT_PUBLIC_*`
 is inlined into the browser bundle at build time, so it is public regardless, and
-keeping it in the repo stops CI and Workers Builds from drifting. The `/api/v1`
-suffix is required; a bare host 404s at the gateway.
+keeping it in the repo rather than in CI config means the value travels with the
+source instead of living in a dashboard. The `/api/v1` suffix is required; a bare
+host 404s at the gateway.
