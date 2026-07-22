@@ -25,10 +25,16 @@ without failing. Symptom seen on 2026-07-22 — the dashboard showed a red
 *Latest build failed* and an active deployment days older than the last green
 Actions run, while production was in fact serving current code.
 
+There is no way to fix this from the repo. The obvious idea — point `build` at
+`opennextjs-cloudflare build` so Workers Builds emits the right output — does not
+work: `opennextjs-cloudflare build` shells out to `npm run build` to produce the
+Next output, so it calls itself until the process dies. A `postbuild` hook
+recurses the same way. `build` must stay `next build`.
+
 If you ever want the dashboard to own deploys instead, set its build command to
-`npm run pages:build` and its deploy command to `npx wrangler deploy`, then
-delete `.github/workflows/deploy.yml` — but that loses the secret validation and
-the Windows guard. Run one or the other, never both.
+`npm run pages:build` and its deploy command to `npx wrangler deploy` — in the
+dashboard, not here — then delete `.github/workflows/deploy.yml`. That loses the
+secret validation and the Windows guard. Run one or the other, never both.
 
 ## Do not deploy from Windows
 
