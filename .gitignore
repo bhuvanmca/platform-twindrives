@@ -5,6 +5,7 @@ node_modules/
 .next/
 .open-next/
 out/
+tsconfig.tsbuildinfo
 
 # Environment
 .env
