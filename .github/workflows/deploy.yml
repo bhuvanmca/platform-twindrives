@@ -50,9 +50,10 @@ jobs:
       - name: Build for Cloudflare Workers
         run: npm run pages:build
 
-      # The API token must belong to the account that owns the worker. A token
-      # from another account fails here with "Authentication error [code: 10000]"
-      # rather than anything that names the real problem.
+      # CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID must both belong to the
+      # account that owns the worker. If they disagree this fails with
+      # "Authentication error [code: 10000]", which names neither the mismatch
+      # nor the missing worker. See docs/DEPLOYMENT.md.
       - name: Upload preview version
         if: github.event_name != 'push'
         run: npx wrangler versions upload
