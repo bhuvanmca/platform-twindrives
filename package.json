@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && opennextjs-cloudflare build --skipNextBuild",
     "start": "next start",
     "lint": "eslint",
-    "pages:build": "opennextjs-cloudflare build",
+    "pages:build": "npm run build",
     "pages:preview": "opennextjs-cloudflare preview",
     "pages:deploy": "node scripts/guard-windows-deploy.mjs && opennextjs-cloudflare deploy"
   },
