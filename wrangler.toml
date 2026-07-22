@@ -3,6 +3,13 @@ main = ".open-next/worker.js"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 
+# There is no custom domain: workers.dev is the production URL. Both of these
+# were already on by default -- stating them stops wrangler warning on every
+# deploy, and stops a future default change from silently taking the site down.
+# preview_urls serves the versions that PRs upload; they are publicly reachable.
+workers_dev = true
+preview_urls = true
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
