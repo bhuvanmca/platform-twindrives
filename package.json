@@ -9,7 +9,7 @@
     "lint": "eslint",
     "pages:build": "opennextjs-cloudflare build",
     "pages:preview": "opennextjs-cloudflare preview",
-    "pages:deploy": "opennextjs-cloudflare deploy"
+    "pages:deploy": "node scripts/guard-windows-deploy.mjs && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
@@ -37,7 +37,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "latest",
+    "@opennextjs/cloudflare": "^1.20.1",
     "wrangler": "^4.86.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

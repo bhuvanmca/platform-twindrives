@@ -1,16 +1,20 @@
-name: Preview build (Cloudflare Workers)
+name: Build and deploy (Cloudflare Workers)
 
-# Production deploys run from Cloudflare Workers Builds on push to main.
-# This workflow only uploads preview versions, which are never promoted to
-# production, so the two paths cannot race for the live worker.
+# Pull requests upload a preview version, which is never promoted to production.
+# Pushes to main deploy the live worker.
+#
+# Both paths build on Linux. Do not deploy from a Windows workstation: the
+# resulting worker 500s on every route (see scripts/guard-windows-deploy.mjs).
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 jobs:
-  preview:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,9 +33,9 @@ jobs:
           fi
           echo "✅ Secrets present."
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: "npm"
@@ -46,8 +50,19 @@ jobs:
       - name: Build for Cloudflare Workers
         run: npm run pages:build
 
+      # The API token must belong to the account that owns the worker. A token
+      # from another account fails here with "Authentication error [code: 10000]"
+      # rather than anything that names the real problem.
       - name: Upload preview version
+        if: github.event_name != 'push'
         run: npx wrangler versions upload
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy to production
+        if: github.event_name == 'push'
+        run: npx wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
