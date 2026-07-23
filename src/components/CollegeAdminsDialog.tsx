@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Plus, Trash2, ShieldCheck, Shield, Users } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 // Matches auth-service models.User rows returned by
@@ -68,6 +69,7 @@ export function CollegeAdminsDialog({
       queryClient.invalidateQueries({ queryKey: key });
       setForm(emptyForm);
       setError("");
+      toast.success("Admin created");
     },
     onError: (err) => setError(apiError(err, "Failed to create admin")),
   });
@@ -77,8 +79,11 @@ export function CollegeAdminsDialog({
       api
         .delete(`/platform/colleges/${college.id}/admins/${id}`)
         .then((r) => r.data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
-    onError: (err) => setError(apiError(err, "Failed to remove admin")),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: key });
+      toast.success("Admin removed");
+    },
+    onError: (err) => toast.error(apiError(err, "Failed to remove admin")),
   });
 
   return (

@@ -11,8 +11,8 @@ import {
   Users,
   ExternalLink,
 } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { QueryProvider } from "@/components/QueryProvider";
 import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
 
 // The college admin app the platform owner is handed off into when opening a
@@ -71,6 +71,15 @@ function toPayload(form: CollegeFormData) {
   };
 }
 
+function errMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === "object" && "response" in err) {
+    const e = (err as { response?: { data?: { error?: string } } }).response
+      ?.data?.error;
+    if (e) return e;
+  }
+  return fallback;
+}
+
 function CollegesContent() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -89,8 +98,10 @@ function CollegesContent() {
       api.post("/platform/colleges", toPayload(data)).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["colleges"] });
+      toast.success("College created");
       closeDialog();
     },
+    onError: (err) => toast.error(errMessage(err, "Failed to create college")),
   });
 
   const updateMutation = useMutation({
@@ -98,14 +109,20 @@ function CollegesContent() {
       api.put(`/platform/colleges/${id}`, toPayload(data)).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["colleges"] });
+      toast.success("College updated");
       closeDialog();
     },
+    onError: (err) => toast.error(errMessage(err, "Failed to update college")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
       api.delete(`/platform/colleges/${id}`).then((r) => r.data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["colleges"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["colleges"] });
+      toast.success("College removed");
+    },
+    onError: (err) => toast.error(errMessage(err, "Failed to remove college")),
   });
 
   // Open a college's own dashboard as its super_admin, without that college's
@@ -122,15 +139,8 @@ function CollegesContent() {
       if (data.refresh_token) frag.set("refresh", data.refresh_token);
       window.location.href = `${ADMIN_APP_URL}/sso#${frag.toString()}`;
     },
-    onError: (err) => {
-      const msg =
-        err &&
-        typeof err === "object" &&
-        "response" in err &&
-        (err as { response?: { data?: { error?: string } } }).response?.data
-          ?.error;
-      alert(msg || "Could not open this college's dashboard.");
-    },
+    onError: (err) =>
+      toast.error(errMessage(err, "Could not open this college's dashboard.")),
   });
 
   function openCreate() {
@@ -215,7 +225,18 @@ function CollegesContent() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-gray-400">
             <Building2 className="w-10 h-10 mb-2 opacity-30" />
-            <p className="text-sm">No colleges found</p>
+            <p className="text-sm">
+              {search ? "No colleges match your search" : "No colleges yet"}
+            </p>
+            {!search && (
+              <button
+                onClick={openCreate}
+                className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition"
+              >
+                <Plus className="w-4 h-4" />
+                Add your first college
+              </button>
+            )}
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -414,9 +435,5 @@ function CollegesContent() {
 }
 
 export default function CollegesPage() {
-  return (
-    <QueryProvider>
-      <CollegesContent />
-    </QueryProvider>
-  );
+  return <CollegesContent />;
 }
