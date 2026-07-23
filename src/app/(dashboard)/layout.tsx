@@ -3,21 +3,15 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import {
-  Building2,
-  Users,
-  BarChart3,
-  CreditCard,
-  LogOut,
-  LayoutDashboard,
-} from "lucide-react";
+import { Building2, LogOut, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Only features with a live backend are shown. Admins/Statistics/Billing call
+// endpoints that do not exist yet (auth-service exposes only /platform/auth/*
+// and /platform/colleges); their pages remain as inert placeholders until the
+// backend implements them.
 const navItems = [
   { href: "/colleges", label: "Colleges", icon: Building2 },
-  { href: "/admins", label: "Admin Users", icon: Users },
-  { href: "/stats", label: "Statistics", icon: BarChart3 },
-  { href: "/billing", label: "Billing", icon: CreditCard },
 ];
 
 export default function DashboardLayout({
