@@ -2,10 +2,24 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Building2, Search, Users } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Building2,
+  Search,
+  Users,
+  ExternalLink,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import { QueryProvider } from "@/components/QueryProvider";
 import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
+
+// The college admin app the platform owner is handed off into when opening a
+// college's dashboard. Overridable per-environment; defaults to the live worker.
+const ADMIN_APP_URL =
+  process.env.NEXT_PUBLIC_ADMIN_APP_URL ||
+  "https://admin-twindrives.bhuvanmsc2023.workers.dev";
 
 // Matches auth-service models.College (GET /platform/colleges → { colleges: [...] }).
 interface College {
@@ -90,6 +104,31 @@ function CollegesContent() {
     mutationFn: (id: number) =>
       api.delete(`/platform/colleges/${id}`).then((r) => r.data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["colleges"] }),
+  });
+
+  // Open a college's own dashboard as its super_admin, without that college's
+  // password. The backend mints a college token; we hand it to the admin app
+  // via the URL fragment (never sent to any server) and redirect there.
+  const impersonateMutation = useMutation({
+    mutationFn: (id: number) =>
+      api
+        .post(`/platform/colleges/${id}/impersonate`)
+        .then((r) => r.data as { token: string; refresh_token?: string }),
+    onSuccess: (data) => {
+      const frag = new URLSearchParams();
+      frag.set("token", data.token);
+      if (data.refresh_token) frag.set("refresh", data.refresh_token);
+      window.location.href = `${ADMIN_APP_URL}/sso#${frag.toString()}`;
+    },
+    onError: (err) => {
+      const msg =
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        (err as { response?: { data?: { error?: string } } }).response?.data
+          ?.error;
+      alert(msg || "Could not open this college's dashboard.");
+    },
   });
 
   function openCreate() {
@@ -220,6 +259,14 @@ function CollegesContent() {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => impersonateMutation.mutate(college.id)}
+                        disabled={impersonateMutation.isPending}
+                        title="Open this college's dashboard"
+                        className="p-1.5 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition disabled:opacity-50"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => setManaging(college)}
                         title="Manage admins"
