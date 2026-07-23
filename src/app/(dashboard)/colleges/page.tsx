@@ -16,10 +16,12 @@ import { QueryProvider } from "@/components/QueryProvider";
 import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
 
 // The college admin app the platform owner is handed off into when opening a
-// college's dashboard. Overridable per-environment; defaults to the live worker.
+// college's dashboard. This must point at the CI-maintained admin worker (the
+// monorepo's admin-web-deploy publishes to the developer-6ef account, which is
+// where the /sso hand-off route lives). Overridable per-environment.
 const ADMIN_APP_URL =
   process.env.NEXT_PUBLIC_ADMIN_APP_URL ||
-  "https://admin-twindrives.bhuvanmsc2023.workers.dev";
+  "https://admin-twindrives.developer-6ef.workers.dev";
 
 // Matches auth-service models.College (GET /platform/colleges → { colleges: [...] }).
 interface College {
