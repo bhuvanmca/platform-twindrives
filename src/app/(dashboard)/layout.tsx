@@ -12,15 +12,18 @@ import {
   LayoutDashboard,
   Menu,
   X,
+  CreditCard,
+  HardDrive,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import { NotificationBell } from "@/components/NotificationBell";
 
-// Billing is intentionally omitted — it has no backend yet. Everything here is
-// backed by live /platform/* endpoints.
 const navItems = [
   { href: "/colleges", label: "Colleges", icon: Building2 },
+  { href: "/billing", label: "Billing", icon: CreditCard },
   { href: "/stats", label: "Statistics", icon: BarChart3 },
+  { href: "/storage", label: "Storage", icon: HardDrive },
   { href: "/activity", label: "Activity", icon: ScrollText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -140,17 +143,21 @@ export default function DashboardLayout({
 
       {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Mobile top bar */}
-        <div className="md:hidden flex items-center gap-3 px-4 h-14 border-b border-gray-200 bg-white shrink-0">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="p-1.5 text-gray-600 hover:text-gray-900"
-            aria-label="Open menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <span className="font-semibold text-gray-900">TwinDrives</span>
-        </div>
+        {/* Top bar */}
+        <header className="flex items-center justify-between gap-3 px-4 md:px-8 h-14 border-b border-gray-200 bg-white shrink-0">
+          <div className="flex items-center gap-3 md:hidden">
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="p-1.5 text-gray-600 hover:text-gray-900"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <span className="font-semibold text-gray-900">TwinDrives</span>
+          </div>
+          <div className="hidden md:block" />
+          <NotificationBell />
+        </header>
         <div className="flex-1 overflow-y-auto p-6 md:p-8">{children}</div>
       </main>
     </div>

@@ -13,11 +13,22 @@ import {
   GraduationCap,
   Briefcase,
   TrendingUp,
+  CreditCard,
+  CalendarClock,
+  HardDrive,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { apiErrorMessage } from "@/lib/errors";
 import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
+import {
+  getSubscription,
+  getStorage,
+  inr,
+  fmtDate,
+  SUB_STATUS_META,
+  STORAGE_STATUS_META,
+} from "@/lib/demo";
 
 interface College {
   id: number;
@@ -188,12 +199,127 @@ export default function CollegeDetailPage() {
         ))}
       </div>
 
+      <div className="grid lg:grid-cols-2 gap-4">
+        <SubscriptionWidget college={college} />
+        <StorageWidget college={college} />
+      </div>
+
       {managing && (
         <CollegeAdminsDialog
           college={{ id: college.id, name: college.name }}
           onClose={() => setManaging(false)}
         />
       )}
+    </div>
+  );
+}
+
+function SubscriptionWidget({ college }: { college: College }) {
+  const sub = getSubscription(college);
+  const meta = SUB_STATUS_META[sub.status];
+  const remain = sub.daysRemaining;
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <CreditCard className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="font-semibold text-gray-900">Subscription</h3>
+        </div>
+        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${meta.badge}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+          {meta.label}
+        </span>
+      </div>
+
+      <div className="flex items-baseline gap-2">
+        <p className="text-2xl font-bold text-gray-900">{sub.plan.name}</p>
+        <span className="text-sm text-gray-400">· {sub.billingCycle}</span>
+      </div>
+      <p className="text-sm text-gray-500 mt-0.5">
+        {inr(sub.totalAmount)} · {sub.licensedUsers} licensed users ({sub.activeUsers} active)
+      </p>
+
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5 text-sm">
+        <Row icon={CalendarClock} label="Expires" value={fmtDate(sub.endDate)} />
+        <Row icon={CalendarClock} label="Payment due" value={fmtDate(sub.paymentDue)} />
+        <div>
+          <dt className="text-xs text-gray-400">Days remaining</dt>
+          <dd className={`font-medium ${remain < 0 ? "text-red-600" : remain <= 10 ? "text-orange-600" : "text-gray-900"}`}>
+            {remain < 0 ? `${Math.abs(remain)} days overdue` : `${remain} days`}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs text-gray-400">Auto-renewal</dt>
+          <dd className="font-medium text-gray-900">{sub.autoRenew ? "On" : "Off"}</dd>
+        </div>
+      </dl>
+
+      <button
+        onClick={() => toast.success(`${sub.plan.name} plan renewed for ${college.name}`)}
+        className="mt-5 w-full py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+      >
+        Renew subscription
+      </button>
+    </div>
+  );
+}
+
+function StorageWidget({ college }: { college: College }) {
+  const s = getStorage(college);
+  const meta = STORAGE_STATUS_META[s.status];
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <HardDrive className="w-4 h-4 text-primary" />
+          </div>
+          <h3 className="font-semibold text-gray-900">Storage</h3>
+        </div>
+        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${meta.badge}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+          {meta.label}
+        </span>
+      </div>
+
+      <div className="flex items-baseline gap-2">
+        <p className="text-2xl font-bold text-gray-900">{s.usedGB} GB</p>
+        <span className="text-sm text-gray-400">of {s.allocatedGB} GB</span>
+      </div>
+
+      <div className="mt-3 h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className={`h-full rounded-full ${meta.bar}`} style={{ width: `${s.usagePct}%` }} />
+      </div>
+      <p className="text-xs text-gray-400 mt-1">{s.usagePct}% used · {s.remainingGB} GB free</p>
+
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5 text-sm">
+        <Row icon={HardDrive} label="Files" value={s.fileCount.toLocaleString("en-IN")} />
+        <Row icon={HardDrive} label="Max upload" value={`${s.maxUploadMB} MB`} />
+        <Row icon={CalendarClock} label="Last upload" value={fmtDate(s.lastUpload)} />
+        <Row icon={CalendarClock} label="Last backup" value={fmtDate(s.lastBackup)} />
+      </dl>
+    </div>
+  );
+}
+
+function Row({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <dt className="flex items-center gap-1 text-xs text-gray-400">
+        <Icon className="w-3 h-3" />
+        {label}
+      </dt>
+      <dd className="font-medium text-gray-900">{value}</dd>
     </div>
   );
 }
