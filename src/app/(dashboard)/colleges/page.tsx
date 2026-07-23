@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus,
@@ -261,9 +262,12 @@ function CollegesContent() {
               {filtered.map((college) => (
                 <tr key={college.id} className="hover:bg-gray-50 transition">
                   <td className="px-5 py-4">
-                    <div className="font-medium text-gray-900">
+                    <Link
+                      href={`/colleges/${college.id}`}
+                      className="font-medium text-gray-900 hover:text-primary hover:underline"
+                    >
                       {college.name}
-                    </div>
+                    </Link>
                   </td>
                   <td className="px-5 py-4 text-gray-600">{college.code}</td>
                   <td className="px-5 py-4 text-gray-600">

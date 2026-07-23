@@ -3,15 +3,27 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Building2, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
+import {
+  Building2,
+  BarChart3,
+  ScrollText,
+  Settings,
+  LogOut,
+  LayoutDashboard,
+  Menu,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 
-// Only features with a live backend are shown. Admins/Statistics/Billing call
-// endpoints that do not exist yet (auth-service exposes only /platform/auth/*
-// and /platform/colleges); their pages remain as inert placeholders until the
-// backend implements them.
-const navItems = [{ href: "/colleges", label: "Colleges", icon: Building2 }];
+// Billing is intentionally omitted — it has no backend yet. Everything here is
+// backed by live /platform/* endpoints.
+const navItems = [
+  { href: "/colleges", label: "Colleges", icon: Building2 },
+  { href: "/stats", label: "Statistics", icon: BarChart3 },
+  { href: "/activity", label: "Activity", icon: ScrollText },
+  { href: "/settings", label: "Settings", icon: Settings },
+];
 
 interface PlatformUser {
   id: number;
