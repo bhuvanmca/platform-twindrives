@@ -12,24 +12,33 @@ promote it.
 The dashboard can also build this repo itself, via Workers & Pages → Settings →
 Builds. **Leave that disconnected.** GitHub Actions is the only pipeline.
 
-Connected, it fails on every push. Workers Builds detects Next.js and runs
-`npm run build`, which is `next build` and emits only `.next/` — but
-`wrangler.toml` points `main` at `.open-next/worker.js`, which nothing but
-`opennextjs-cloudflare build` produces. The deploy step then cannot find its
-entrypoint.
+This is no longer because the build is broken. As of #5, `build` is
+`next build && opennextjs-cloudflare build --skipNextBuild` with
+`output: "standalone"` in `next.config.ts`, so `npm run build` emits
+`.open-next/worker.js`. A connected Workers Builds — which runs `npm run build`
+then `npx wrangler deploy` — therefore now succeeds. (Before #5, `build` was
+just `next build`, which emitted only `.next/` while `wrangler.toml` points
+`main` at `.open-next/worker.js`, so the deploy step could not find its
+entrypoint. That is the "Could not find compiled Open Next config" failure in
+any dashboard build dated before 2026-07-22 21:20 — a stale log, not the current
+state.)
 
-The failing build is the harmless half. The real hazard is that both pipelines
-deploy the *same* worker, so whichever finishes last wins: a slow dashboard
-build can overwrite a newer Actions deploy with older code, silently and
-without failing. Symptom seen on 2026-07-22 — the dashboard showed a red
+Keep it disconnected anyway, because a green build does not remove the hazard:
+both pipelines deploy the *same* worker, so whichever finishes last wins. A slow
+dashboard build can overwrite a newer Actions deploy with older code, silently
+and without failing. Symptom seen on 2026-07-22 — the dashboard showed a red
 *Latest build failed* and an active deployment days older than the last green
-Actions run, while production was in fact serving current code.
+Actions run, while production was in fact serving current code. Now that the
+dashboard build passes, the red X is gone but the race is not — pick one
+pipeline.
 
-There is no way to fix this from the repo. The obvious idea — point `build` at
-`opennextjs-cloudflare build` so Workers Builds emits the right output — does not
-work: `opennextjs-cloudflare build` shells out to `npm run build` to produce the
-Next output, so it calls itself until the process dies. A `postbuild` hook
-recurses the same way. `build` must stay `next build`.
+Historical note: an earlier version of this doc claimed the build could not be
+fixed from the repo, because pointing `build` at `opennextjs-cloudflare build`
+makes it shell out to `npm run build` and recurse until the process dies. #5
+broke that cycle: `--skipNextBuild` stops the recursion, and `output: "standalone"`
+supplies the standalone `.next` that `--skipNextBuild` would otherwise leave
+missing. The build side is fixed; the disconnect advice stands on the race, not
+on a broken build.
 
 If you ever want the dashboard to own deploys instead, set its build command to
 `npm run pages:build` and its deploy command to `npx wrangler deploy` — in the
