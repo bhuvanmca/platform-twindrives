@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,9 @@ import {
   CreditCard,
   CalendarClock,
   HardDrive,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -24,6 +27,7 @@ import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
 import {
   getSubscription,
   getStorage,
+  setSubscriptionPricing,
   inr,
   fmtDate,
   SUB_STATUS_META,
@@ -215,9 +219,40 @@ export default function CollegeDetailPage() {
 }
 
 function SubscriptionWidget({ college }: { college: College }) {
-  const sub = getSubscription(college);
+  const queryClient = useQueryClient();
+  const [rev, setRev] = useState(0);
+  const [editing, setEditing] = useState(false);
+  const [cost, setCost] = useState(0);
+  const [users, setUsers] = useState(0);
+
+  const sub = useMemo(
+    () => getSubscription(college),
+    // rev forces a re-read after a pricing change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [college, rev]
+  );
   const meta = SUB_STATUS_META[sub.status];
   const remain = sub.daysRemaining;
+
+  function startEdit() {
+    setCost(sub.costPerUser);
+    setUsers(sub.licensedUsers);
+    setEditing(true);
+  }
+
+  function save() {
+    if (cost < 0 || users < 1) {
+      toast.error("Enter a valid price and user count");
+      return;
+    }
+    setSubscriptionPricing(college.id, { costPerUser: cost, licensedUsers: users });
+    setRev((v) => v + 1);
+    setEditing(false);
+    // billing invoices derive from the subscription — refresh them too
+    queryClient.invalidateQueries({ queryKey: ["colleges"] });
+    toast.success("Pricing updated");
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5">
       <div className="flex items-center justify-between mb-4">
@@ -227,10 +262,21 @@ function SubscriptionWidget({ college }: { college: College }) {
           </div>
           <h3 className="font-semibold text-gray-900">Subscription</h3>
         </div>
-        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${meta.badge}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-          {meta.label}
-        </span>
+        <div className="flex items-center gap-2">
+          {!editing && (
+            <button
+              onClick={startEdit}
+              title="Edit pricing"
+              className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${meta.badge}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+            {meta.label}
+          </span>
+        </div>
       </div>
 
       <div className="flex items-baseline gap-2">
@@ -241,27 +287,78 @@ function SubscriptionWidget({ college }: { college: College }) {
         {inr(sub.totalAmount)} · {sub.licensedUsers} licensed users ({sub.activeUsers} active)
       </p>
 
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5 text-sm">
-        <Row icon={CalendarClock} label="Expires" value={fmtDate(sub.endDate)} />
-        <Row icon={CalendarClock} label="Payment due" value={fmtDate(sub.paymentDue)} />
-        <div>
-          <dt className="text-xs text-gray-400">Days remaining</dt>
-          <dd className={`font-medium ${remain < 0 ? "text-red-600" : remain <= 10 ? "text-orange-600" : "text-gray-900"}`}>
-            {remain < 0 ? `${Math.abs(remain)} days overdue` : `${remain} days`}
-          </dd>
+      {editing ? (
+        <div className="mt-5 space-y-3 rounded-lg border border-gray-200 p-4 bg-gray-50">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Price per user (₹)</label>
+              <input
+                type="number"
+                min={0}
+                value={cost}
+                onChange={(e) => setCost(Number(e.target.value))}
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Licensed users</label>
+              <input
+                type="number"
+                min={1}
+                value={users}
+                onChange={(e) => setUsers(Number(e.target.value))}
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-white"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">Total per cycle</span>
+            <span className="text-base font-bold text-gray-900">{inr((cost || 0) * (users || 0))}</span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={save}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90"
+            >
+              <Check className="w-4 h-4" /> Save
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-white"
+            >
+              <X className="w-4 h-4" /> Cancel
+            </button>
+          </div>
         </div>
-        <div>
-          <dt className="text-xs text-gray-400">Auto-renewal</dt>
-          <dd className="font-medium text-gray-900">{sub.autoRenew ? "On" : "Off"}</dd>
-        </div>
-      </dl>
+      ) : (
+        <>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5 text-sm">
+            <div>
+              <dt className="text-xs text-gray-400">Price per user</dt>
+              <dd className="font-medium text-gray-900">{inr(sub.costPerUser)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-gray-400">Auto-renewal</dt>
+              <dd className="font-medium text-gray-900">{sub.autoRenew ? "On" : "Off"}</dd>
+            </div>
+            <Row icon={CalendarClock} label="Expires" value={fmtDate(sub.endDate)} />
+            <Row icon={CalendarClock} label="Payment due" value={fmtDate(sub.paymentDue)} />
+            <div>
+              <dt className="text-xs text-gray-400">Days remaining</dt>
+              <dd className={`font-medium ${remain < 0 ? "text-red-600" : remain <= 10 ? "text-orange-600" : "text-gray-900"}`}>
+                {remain < 0 ? `${Math.abs(remain)} days overdue` : `${remain} days`}
+              </dd>
+            </div>
+          </dl>
 
-      <button
-        onClick={() => toast.success(`${sub.plan.name} plan renewed for ${college.name}`)}
-        className="mt-5 w-full py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-      >
-        Renew subscription
-      </button>
+          <button
+            onClick={() => toast.success(`${sub.plan.name} plan renewed for ${college.name}`)}
+            className="mt-5 w-full py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+          >
+            Renew subscription
+          </button>
+        </>
+      )}
     </div>
   );
 }

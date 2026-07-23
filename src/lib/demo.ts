@@ -124,8 +124,14 @@ export function getSubscription(c: DemoCollege): Subscription {
   const r = rngFor(c.id, 1);
   const plan = PLANS[c.id % PLANS.length];
   const cycle = pick(r, CYCLES);
-  const licensedUsers = Math.max(25, between(r, 40, Math.min(plan.maxUsers, 1800)));
-  const activeUsers = Math.round(licensedUsers * (0.55 + r() * 0.4));
+  const ovr = subscriptionOverride(c.id);
+  const licensedUsers =
+    ovr?.licensedUsers ?? Math.max(25, between(r, 40, Math.min(plan.maxUsers, 1800)));
+  const costPerUser = ovr?.costPerUser ?? plan.costPerUser;
+  const activeUsers = Math.min(
+    licensedUsers,
+    Math.round(licensedUsers * (0.55 + r() * 0.4))
+  );
   const daysRemaining = REMAIN_BUCKETS[c.id % REMAIN_BUCKETS.length];
 
   const now = new Date();
@@ -144,13 +150,13 @@ export function getSubscription(c: DemoCollege): Subscription {
     cycleMonths: cycle.months,
     licensedUsers,
     activeUsers,
-    costPerUser: plan.costPerUser,
+    costPerUser,
     startDate,
     endDate,
     nextRenewal,
     paymentDue,
     autoRenew: r() > 0.35,
-    totalAmount: licensedUsers * plan.costPerUser,
+    totalAmount: licensedUsers * costPerUser,
     daysRemaining,
     status,
   };
@@ -337,6 +343,7 @@ export const STORAGE_STATUS_META: Record<StorageStatus, { label: string; dot: st
 interface Overrides {
   invoices?: Record<string, { status?: InvoiceStatus; lastPaymentDate?: string }>;
   storage?: Record<number, number>; // collegeId → allocatedGB
+  subscription?: Record<number, { costPerUser?: number; licensedUsers?: number }>;
 }
 
 const KEY = "twindrives_demo_overrides";
@@ -389,6 +396,24 @@ export function setStorageAllocation(collegeId: number, gb: number) {
   const ov = readOverrides();
   ov.storage = ov.storage || {};
   ov.storage[collegeId] = gb;
+  writeOverrides(ov);
+}
+
+function subscriptionOverride(
+  collegeId: number
+): { costPerUser?: number; licensedUsers?: number } | undefined {
+  return readOverrides().subscription?.[collegeId];
+}
+
+// Set per-college pricing. Flows into the subscription widget and every invoice
+// (invoices are derived from the subscription), so billing totals update too.
+export function setSubscriptionPricing(
+  collegeId: number,
+  patch: { costPerUser?: number; licensedUsers?: number }
+) {
+  const ov = readOverrides();
+  ov.subscription = ov.subscription || {};
+  ov.subscription[collegeId] = { ...ov.subscription[collegeId], ...patch };
   writeOverrides(ov);
 }
 
