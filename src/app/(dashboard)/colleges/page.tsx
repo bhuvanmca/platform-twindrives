@@ -6,38 +6,53 @@ import { Plus, Pencil, Trash2, Building2, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import { QueryProvider } from "@/components/QueryProvider";
 
+// Matches auth-service models.College (GET /platform/colleges → { colleges: [...] }).
 interface College {
-  id: string;
+  id: number;
   name: string;
   code: string;
-  domain: string;
-  contact_email: string;
-  contact_phone: string;
-  city: string;
-  state: string;
-  active: boolean;
+  logo_url: string | null;
+  email_domain: string | null;
+  is_active: boolean;
   created_at: string;
 }
 
+// Matches auth-service models.CollegeInput (create/update payload).
 interface CollegeFormData {
   name: string;
   code: string;
-  domain: string;
-  contact_email: string;
-  contact_phone: string;
-  city: string;
-  state: string;
+  email_domain: string;
+  logo_url: string;
+  is_active: boolean;
 }
 
 const emptyForm: CollegeFormData = {
   name: "",
   code: "",
-  domain: "",
-  contact_email: "",
-  contact_phone: "",
-  city: "",
-  state: "",
+  email_domain: "",
+  logo_url: "",
+  is_active: true,
 };
+
+// The list endpoint wraps the array as { colleges: [...] }; tolerate a bare
+// array too so a future contract change doesn't crash the page.
+function unwrapColleges(data: unknown): College[] {
+  if (Array.isArray(data)) return data as College[];
+  if (data && typeof data === "object" && Array.isArray((data as { colleges?: unknown }).colleges)) {
+    return (data as { colleges: College[] }).colleges;
+  }
+  return [];
+}
+
+function toPayload(form: CollegeFormData) {
+  return {
+    name: form.name,
+    code: form.code,
+    email_domain: form.email_domain.trim() || null,
+    logo_url: form.logo_url.trim() || null,
+    is_active: form.is_active,
+  };
+}
 
 function CollegesContent() {
   const queryClient = useQueryClient();
@@ -48,12 +63,12 @@ function CollegesContent() {
 
   const { data: colleges = [], isLoading } = useQuery<College[]>({
     queryKey: ["colleges"],
-    queryFn: () => api.get("/platform/colleges").then((r) => r.data),
+    queryFn: () => api.get("/platform/colleges").then((r) => unwrapColleges(r.data)),
   });
 
   const createMutation = useMutation({
     mutationFn: (data: CollegeFormData) =>
-      api.post("/platform/colleges", data).then((r) => r.data),
+      api.post("/platform/colleges", toPayload(data)).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["colleges"] });
       closeDialog();
@@ -61,8 +76,8 @@ function CollegesContent() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CollegeFormData }) =>
-      api.put(`/platform/colleges/${id}`, data).then((r) => r.data),
+    mutationFn: ({ id, data }: { id: number; data: CollegeFormData }) =>
+      api.put(`/platform/colleges/${id}`, toPayload(data)).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["colleges"] });
       closeDialog();
@@ -70,7 +85,7 @@ function CollegesContent() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) =>
+    mutationFn: (id: number) =>
       api.delete(`/platform/colleges/${id}`).then((r) => r.data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["colleges"] }),
   });
@@ -86,11 +101,9 @@ function CollegesContent() {
     setForm({
       name: college.name,
       code: college.code,
-      domain: college.domain,
-      contact_email: college.contact_email,
-      contact_phone: college.contact_phone,
-      city: college.city,
-      state: college.state,
+      email_domain: college.email_domain ?? "",
+      logo_url: college.logo_url ?? "",
+      is_active: college.is_active,
     });
     setShowDialog(true);
   }
@@ -110,11 +123,12 @@ function CollegesContent() {
     }
   }
 
+  const q = search.toLowerCase();
   const filtered = colleges.filter(
     (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.code.toLowerCase().includes(search.toLowerCase()) ||
-      c.city.toLowerCase().includes(search.toLowerCase())
+      c.name.toLowerCase().includes(q) ||
+      c.code.toLowerCase().includes(q) ||
+      (c.email_domain ?? "").toLowerCase().includes(q)
   );
 
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -171,10 +185,7 @@ function CollegesContent() {
                   Code
                 </th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Contact
+                  Email Domain
                 </th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Status
@@ -189,24 +200,20 @@ function CollegesContent() {
                     <div className="font-medium text-gray-900">
                       {college.name}
                     </div>
-                    <div className="text-xs text-gray-400">{college.domain}</div>
                   </td>
                   <td className="px-5 py-4 text-gray-600">{college.code}</td>
                   <td className="px-5 py-4 text-gray-600">
-                    {college.city}, {college.state}
-                  </td>
-                  <td className="px-5 py-4 text-gray-600">
-                    {college.contact_email}
+                    {college.email_domain ?? "—"}
                   </td>
                   <td className="px-5 py-4">
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        college.active
+                        college.is_active
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-600"
                       }`}
                     >
-                      {college.active ? "Active" : "Inactive"}
+                      {college.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="px-5 py-4">
@@ -276,68 +283,42 @@ function CollegesContent() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Domain
+                    Email Domain
                   </label>
                   <input
-                    value={form.domain}
+                    value={form.email_domain}
                     onChange={(e) =>
-                      setForm({ ...form, domain: e.target.value })
+                      setForm({ ...form, email_domain: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                     placeholder="kongu.edu"
                   />
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Email *
+                    Logo URL
                   </label>
                   <input
-                    required
-                    type="email"
-                    value={form.contact_email}
+                    value={form.logo_url}
                     onChange={(e) =>
-                      setForm({ ...form, contact_email: e.target.value })
+                      setForm({ ...form, logo_url: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                    placeholder="principal@kongu.edu"
+                    placeholder="https://…/logo.png"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Phone
+                <div className="col-span-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={form.is_active}
+                      onChange={(e) =>
+                        setForm({ ...form, is_active: e.target.checked })
+                      }
+                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/40"
+                    />
+                    Active
                   </label>
-                  <input
-                    value={form.contact_phone}
-                    onChange={(e) =>
-                      setForm({ ...form, contact_phone: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City
-                  </label>
-                  <input
-                    value={form.city}
-                    onChange={(e) => setForm({ ...form, city: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                    placeholder="Erode"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    State
-                  </label>
-                  <input
-                    value={form.state}
-                    onChange={(e) =>
-                      setForm({ ...form, state: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                    placeholder="Tamil Nadu"
-                  />
                 </div>
               </div>
 
