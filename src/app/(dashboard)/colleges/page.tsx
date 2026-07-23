@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Building2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Search, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { QueryProvider } from "@/components/QueryProvider";
+import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
 
 // Matches auth-service models.College (GET /platform/colleges → { colleges: [...] }).
 interface College {
@@ -59,6 +60,7 @@ function CollegesContent() {
   const [search, setSearch] = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState<College | null>(null);
+  const [managing, setManaging] = useState<College | null>(null);
   const [form, setForm] = useState<CollegeFormData>(emptyForm);
 
   const { data: colleges = [], isLoading } = useQuery<College[]>({
@@ -219,7 +221,15 @@ function CollegesContent() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2 justify-end">
                       <button
+                        onClick={() => setManaging(college)}
+                        title="Manage admins"
+                        className="p-1.5 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition"
+                      >
+                        <Users className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => openEdit(college)}
+                        title="Edit college"
                         className="p-1.5 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition"
                       >
                         <Pencil className="w-4 h-4" />
@@ -245,6 +255,14 @@ function CollegesContent() {
           </table>
         )}
       </div>
+
+      {/* Manage admins drawer */}
+      {managing && (
+        <CollegeAdminsDialog
+          college={{ id: managing.id, name: managing.name }}
+          onClose={() => setManaging(null)}
+        />
+      )}
 
       {/* Dialog */}
       {showDialog && (
