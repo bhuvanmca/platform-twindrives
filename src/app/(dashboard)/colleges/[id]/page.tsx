@@ -110,7 +110,7 @@ export default function CollegeDetailPage() {
   });
 
   if (!college) {
-    return <div className="text-sm text-gray-400">Loading college…</div>;
+    return <div className="text-sm text-muted-foreground">Loading college…</div>;
   }
 
   const cards = [
@@ -127,7 +127,7 @@ export default function CollegeDetailPage() {
     <div className="space-y-6">
       <Link
         href="/colleges"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="w-4 h-4" />
         Colleges
@@ -144,8 +144,8 @@ export default function CollegeDetailPage() {
             )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{college.name}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-foreground">{college.name}</h1>
+            <p className="text-sm text-muted-foreground">
               {college.code}
               {college.email_domain ? ` · ${college.email_domain}` : ""}
             </p>
@@ -153,8 +153,8 @@ export default function CollegeDetailPage() {
           <span
             className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
               college.is_active
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-600"
+                ? "bg-success-subtle text-success"
+                : "bg-muted text-muted-foreground"
             }`}
           >
             {college.is_active ? "Active" : "Inactive"}
@@ -172,7 +172,7 @@ export default function CollegeDetailPage() {
           </button>
           <button
             onClick={() => setManaging(true)}
-            className={`${btn} border border-gray-300 text-gray-700 hover:bg-gray-50`}
+            className={`${btn} border border-input text-foreground hover:bg-accent/50`}
           >
             <Users className="w-4 h-4" />
             Manage admins
@@ -180,7 +180,7 @@ export default function CollegeDetailPage() {
           <button
             onClick={() => toggleMutation.mutate(college.is_active)}
             disabled={toggleMutation.isPending}
-            className={`${btn} border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60`}
+            className={`${btn} border border-input text-foreground hover:bg-accent/50 disabled:opacity-60`}
           >
             <Power className="w-4 h-4" />
             {college.is_active ? "Deactivate" : "Activate"}
@@ -190,15 +190,15 @@ export default function CollegeDetailPage() {
 
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {cards.map((c) => (
-          <div key={c.label} className="bg-white rounded-xl border border-gray-200 p-5">
+          <div key={c.label} className="bg-card rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-500">{c.label}</span>
+              <span className="text-sm font-medium text-muted-foreground">{c.label}</span>
               <div className="p-2 rounded-lg bg-primary/10">
                 <c.icon className="w-4 h-4 text-primary" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-900">{c.value}</p>
-            {c.sub && <p className="text-xs text-gray-400 mt-1">{c.sub}</p>}
+            <p className="text-3xl font-bold text-foreground">{c.value}</p>
+            {c.sub && <p className="text-xs text-muted-foreground mt-1">{c.sub}</p>}
           </div>
         ))}
       </div>
@@ -254,20 +254,20 @@ function SubscriptionWidget({ college }: { college: College }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className="bg-card rounded-xl border border-border p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-primary/10">
             <CreditCard className="w-4 h-4 text-primary" />
           </div>
-          <h3 className="font-semibold text-gray-900">Subscription</h3>
+          <h3 className="font-semibold text-foreground">Subscription</h3>
         </div>
         <div className="flex items-center gap-2">
           {!editing && (
             <button
               onClick={startEdit}
               title="Edit pricing"
-              className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -280,40 +280,40 @@ function SubscriptionWidget({ college }: { college: College }) {
       </div>
 
       <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-gray-900">{sub.plan.name}</p>
-        <span className="text-sm text-gray-400">· {sub.billingCycle}</span>
+        <p className="text-2xl font-bold text-foreground">{sub.plan.name}</p>
+        <span className="text-sm text-muted-foreground">· {sub.billingCycle}</span>
       </div>
-      <p className="text-sm text-gray-500 mt-0.5">
+      <p className="text-sm text-muted-foreground mt-0.5">
         {inr(sub.totalAmount)} · {sub.licensedUsers} licensed users ({sub.activeUsers} active)
       </p>
 
       {editing ? (
-        <div className="mt-5 space-y-3 rounded-lg border border-gray-200 p-4 bg-gray-50">
+        <div className="mt-5 space-y-3 rounded-lg border border-border p-4 bg-muted/50">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Price per user (₹)</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Price per user (₹)</label>
               <input
                 type="number"
                 min={0}
                 value={cost}
                 onChange={(e) => setCost(Number(e.target.value))}
-                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-white"
+                className="w-full px-3 py-1.5 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-card"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Licensed users</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Licensed users</label>
               <input
                 type="number"
                 min={1}
                 value={users}
                 onChange={(e) => setUsers(Number(e.target.value))}
-                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-white"
+                className="w-full px-3 py-1.5 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-card"
               />
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">Total per cycle</span>
-            <span className="text-base font-bold text-gray-900">{inr((cost || 0) * (users || 0))}</span>
+            <span className="text-xs text-muted-foreground">Total per cycle</span>
+            <span className="text-base font-bold text-foreground">{inr((cost || 0) * (users || 0))}</span>
           </div>
           <div className="flex gap-2">
             <button
@@ -324,7 +324,7 @@ function SubscriptionWidget({ college }: { college: College }) {
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-white"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-input text-sm font-medium text-foreground hover:bg-card"
             >
               <X className="w-4 h-4" /> Cancel
             </button>
@@ -334,18 +334,18 @@ function SubscriptionWidget({ college }: { college: College }) {
         <>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5 text-sm">
             <div>
-              <dt className="text-xs text-gray-400">Price per user</dt>
-              <dd className="font-medium text-gray-900">{inr(sub.costPerUser)}</dd>
+              <dt className="text-xs text-muted-foreground">Price per user</dt>
+              <dd className="font-medium text-foreground">{inr(sub.costPerUser)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-gray-400">Auto-renewal</dt>
-              <dd className="font-medium text-gray-900">{sub.autoRenew ? "On" : "Off"}</dd>
+              <dt className="text-xs text-muted-foreground">Auto-renewal</dt>
+              <dd className="font-medium text-foreground">{sub.autoRenew ? "On" : "Off"}</dd>
             </div>
             <Row icon={CalendarClock} label="Expires" value={fmtDate(sub.endDate)} />
             <Row icon={CalendarClock} label="Payment due" value={fmtDate(sub.paymentDue)} />
             <div>
-              <dt className="text-xs text-gray-400">Days remaining</dt>
-              <dd className={`font-medium ${remain < 0 ? "text-red-600" : remain <= 10 ? "text-orange-600" : "text-gray-900"}`}>
+              <dt className="text-xs text-muted-foreground">Days remaining</dt>
+              <dd className={`font-medium ${remain < 0 ? "text-destructive" : remain <= 10 ? "text-warning-strong" : "text-foreground"}`}>
                 {remain < 0 ? `${Math.abs(remain)} days overdue` : `${remain} days`}
               </dd>
             </div>
@@ -353,7 +353,7 @@ function SubscriptionWidget({ college }: { college: College }) {
 
           <button
             onClick={() => toast.success(`${sub.plan.name} plan renewed for ${college.name}`)}
-            className="mt-5 w-full py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="mt-5 w-full py-2 rounded-lg border border-input text-sm font-medium text-foreground hover:bg-accent/50 transition"
           >
             Renew subscription
           </button>
@@ -367,13 +367,13 @@ function StorageWidget({ college }: { college: College }) {
   const s = getStorage(college);
   const meta = STORAGE_STATUS_META[s.status];
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className="bg-card rounded-xl border border-border p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-primary/10">
             <HardDrive className="w-4 h-4 text-primary" />
           </div>
-          <h3 className="font-semibold text-gray-900">Storage</h3>
+          <h3 className="font-semibold text-foreground">Storage</h3>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${meta.badge}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
@@ -382,14 +382,14 @@ function StorageWidget({ college }: { college: College }) {
       </div>
 
       <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-gray-900">{s.usedGB} GB</p>
-        <span className="text-sm text-gray-400">of {s.allocatedGB} GB</span>
+        <p className="text-2xl font-bold text-foreground">{s.usedGB} GB</p>
+        <span className="text-sm text-muted-foreground">of {s.allocatedGB} GB</span>
       </div>
 
-      <div className="mt-3 h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
+      <div className="mt-3 h-2.5 w-full rounded-full bg-muted overflow-hidden">
         <div className={`h-full rounded-full ${meta.bar}`} style={{ width: `${s.usagePct}%` }} />
       </div>
-      <p className="text-xs text-gray-400 mt-1">{s.usagePct}% used · {s.remainingGB} GB free</p>
+      <p className="text-xs text-muted-foreground mt-1">{s.usagePct}% used · {s.remainingGB} GB free</p>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5 text-sm">
         <Row icon={HardDrive} label="Files" value={s.fileCount.toLocaleString("en-IN")} />
@@ -412,11 +412,11 @@ function Row({
 }) {
   return (
     <div>
-      <dt className="flex items-center gap-1 text-xs text-gray-400">
+      <dt className="flex items-center gap-1 text-xs text-muted-foreground">
         <Icon className="w-3 h-3" />
         {label}
       </dt>
-      <dd className="font-medium text-gray-900">{value}</dd>
+      <dd className="font-medium text-foreground">{value}</dd>
     </div>
   );
 }

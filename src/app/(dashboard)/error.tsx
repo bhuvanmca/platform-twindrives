@@ -18,11 +18,11 @@ export default function DashboardError({
 
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-6">
-      <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-        <AlertTriangle className="w-6 h-6 text-red-500" />
+      <div className="w-12 h-12 rounded-full bg-destructive-subtle flex items-center justify-center mb-4">
+        <AlertTriangle className="w-6 h-6 text-destructive" />
       </div>
-      <h2 className="text-lg font-semibold text-gray-900">Something went wrong</h2>
-      <p className="text-sm text-gray-500 mt-1 max-w-sm">
+      <h2 className="text-lg font-semibold text-foreground">Something went wrong</h2>
+      <p className="text-sm text-muted-foreground mt-1 max-w-sm">
         This page hit an unexpected error. You can retry, or head back to the
         colleges list.
       </p>

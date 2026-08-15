@@ -258,8 +258,8 @@ function CollegesContent() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Colleges</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">Colleges</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Manage all institutions on the platform
           </p>
         </div>
@@ -274,24 +274,24 @@ function CollegesContent() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search colleges…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+          className="w-full pl-9 pr-4 py-2.5 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+          <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
             Loading…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-gray-400">
+          <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
             <Building2 className="w-10 h-10 mb-2 opacity-30" />
             <p className="text-sm">
               {search ? "No colleges match your search" : "No colleges yet"}
@@ -308,44 +308,44 @@ function CollegesContent() {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-muted/60 border-b border-border">
               <tr>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   College
                 </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Code
                 </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Email Domain
                 </th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-5 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {filtered.map((college) => (
-                <tr key={college.id} className="hover:bg-gray-50 transition">
+                <tr key={college.id} className="hover:bg-accent/50 transition">
                   <td className="px-5 py-4">
                     <Link
                       href={`/colleges/${college.id}`}
-                      className="font-medium text-gray-900 hover:text-primary hover:underline"
+                      className="font-medium text-foreground hover:text-primary hover:underline"
                     >
                       {college.name}
                     </Link>
                   </td>
-                  <td className="px-5 py-4 text-gray-600">{college.code}</td>
-                  <td className="px-5 py-4 text-gray-600">
+                  <td className="px-5 py-4 text-muted-foreground">{college.code}</td>
+                  <td className="px-5 py-4 text-muted-foreground">
                     {college.email_domain ?? "—"}
                   </td>
                   <td className="px-5 py-4">
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                         college.is_active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
+                          ? "bg-success-subtle text-success"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {college.is_active ? "Active" : "Inactive"}
@@ -357,21 +357,21 @@ function CollegesContent() {
                         onClick={() => impersonateMutation.mutate(college.id)}
                         disabled={impersonateMutation.isPending}
                         title="Open this college's dashboard"
-                        className="p-1.5 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition disabled:opacity-50"
+                        className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition disabled:opacity-50"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setManaging(college)}
                         title="Manage admins"
-                        className="p-1.5 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition"
+                        className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition"
                       >
                         <Users className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openEdit(college)}
                         title="Edit college"
-                        className="p-1.5 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition"
+                        className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
@@ -384,7 +384,7 @@ function CollegesContent() {
                           )
                             deleteMutation.mutate(college.id);
                         }}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive-subtle rounded-lg transition"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -408,13 +408,13 @@ function CollegesContent() {
       {/* Dialog */}
       {showDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-border">
+              <h2 className="text-lg font-semibold text-foreground">
                 {editing ? "Edit College" : "Onboard a College"}
               </h2>
               {!editing && (
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Set up the tenant, its first administrator, subscription and storage
                 </p>
               )}
@@ -462,8 +462,8 @@ function CollegesContent() {
                     <input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} className={FIELD} placeholder="https://…/logo.png" />
                   </div>
                   <div className="col-span-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                      <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/40" />
+                    <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="w-4 h-4 rounded border-input text-primary focus:ring-primary/40" />
                       Active
                     </label>
                   </div>
@@ -482,7 +482,7 @@ function CollegesContent() {
                       </div>
                       <div>
                         <Label>Role</Label>
-                        <select value={admin.role} onChange={(e) => setAdmin({ ...admin, role: e.target.value as "admin" | "super_admin" })} className={`${FIELD} bg-white`}>
+                        <select value={admin.role} onChange={(e) => setAdmin({ ...admin, role: e.target.value as "admin" | "super_admin" })} className={`${FIELD} bg-card`}>
                           <option value="super_admin">Super Admin</option>
                           <option value="admin">Admin</option>
                         </select>
@@ -504,7 +504,7 @@ function CollegesContent() {
                         <input type="text" value={admin.password} onChange={(e) => setAdmin({ ...admin, password: e.target.value })} className={FIELD} placeholder="Min. 6 characters" />
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400">Leave email &amp; password blank to add the administrator later.</p>
+                    <p className="text-xs text-muted-foreground">Leave email &amp; password blank to add the administrator later.</p>
                     <div className="flex flex-wrap gap-4">
                       <Check checked={admin.sendCreds} onChange={(v) => setAdmin({ ...admin, sendCreds: v })}>Send login credentials</Check>
                       <Check checked={admin.forceChange} onChange={(v) => setAdmin({ ...admin, forceChange: v })}>Force password change on first login</Check>
@@ -523,7 +523,7 @@ function CollegesContent() {
                             const p = PLANS.find((x) => x.id === e.target.value) ?? PLANS[0];
                             setSub({ ...sub, planId: p.id, costPerUser: p.costPerUser, maxUsers: Math.min(sub.maxUsers, p.maxUsers) });
                           }}
-                          className={`${FIELD} bg-white`}
+                          className={`${FIELD} bg-card`}
                         >
                           {PLANS.map((p) => (
                             <option key={p.id} value={p.id}>{p.name} — {p.blurb}</option>
@@ -532,7 +532,7 @@ function CollegesContent() {
                       </div>
                       <div>
                         <Label>Billing cycle</Label>
-                        <select value={sub.billingCycle} onChange={(e) => setSub({ ...sub, billingCycle: e.target.value })} className={`${FIELD} bg-white`}>
+                        <select value={sub.billingCycle} onChange={(e) => setSub({ ...sub, billingCycle: e.target.value })} className={`${FIELD} bg-card`}>
                           {["Monthly", "Quarterly", "Half-Yearly", "Yearly"].map((c) => (
                             <option key={c} value={c}>{c}</option>
                           ))}
@@ -547,13 +547,13 @@ function CollegesContent() {
                         <input type="number" min={1} max={selectedPlan.maxUsers} value={sub.maxUsers} onChange={(e) => setSub({ ...sub, maxUsers: Number(e.target.value) })} className={FIELD} />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+                    <div className="flex items-center justify-between bg-muted/50 rounded-lg px-4 py-3">
                       <div>
                         <Check checked={sub.autoRenew} onChange={(v) => setSub({ ...sub, autoRenew: v })}>Auto-renewal</Check>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-gray-400">Total per cycle</p>
-                        <p className="text-lg font-bold text-gray-900">{inr(subTotal)}</p>
+                        <p className="text-xs text-muted-foreground">Total per cycle</p>
+                        <p className="text-lg font-bold text-foreground">{inr(subTotal)}</p>
                       </div>
                     </div>
                   </section>
@@ -584,8 +584,8 @@ function CollegesContent() {
               )}
             </form>
 
-            <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
-              <button type="button" onClick={closeDialog} className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            <div className="flex gap-3 px-6 py-4 border-t border-border">
+              <button type="button" onClick={closeDialog} className="flex-1 py-2 px-4 border border-input text-foreground rounded-lg text-sm font-medium hover:bg-accent/50 transition">
                 Cancel
               </button>
               <button type="submit" form="onboard-form" disabled={isPending} className="flex-1 py-2 px-4 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition disabled:opacity-60">
@@ -600,18 +600,18 @@ function CollegesContent() {
 }
 
 const FIELD =
-  "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary";
+  "w-full px-3 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 border-b border-gray-100 pb-2">
+    <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground border-b border-border pb-2">
       {children}
     </h3>
   );
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>;
+  return <label className="block text-sm font-medium text-foreground mb-1">{children}</label>;
 }
 
 function Check({
@@ -624,8 +624,8 @@ function Check({
   children: React.ReactNode;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/40" />
+    <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4 rounded border-input text-primary focus:ring-primary/40" />
       {children}
     </label>
   );

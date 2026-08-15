@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { NotificationBell } from "@/components/NotificationBell";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { href: "/colleges", label: "Colleges", icon: Building2 },
@@ -126,7 +127,7 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       {/* Desktop sidebar */}
       <div className="hidden md:flex">{sidebar}</div>
 
@@ -144,19 +145,22 @@ export default function DashboardLayout({
       {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between gap-3 px-4 md:px-8 h-14 border-b border-gray-200 bg-white shrink-0">
+        <header className="flex items-center justify-between gap-3 px-4 md:px-8 h-14 border-b border-border bg-card shrink-0">
           <div className="flex items-center gap-3 md:hidden">
             <button
               onClick={() => setMobileOpen(true)}
-              className="p-1.5 text-gray-600 hover:text-gray-900"
+              className="p-1.5 text-muted-foreground hover:text-foreground"
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="font-semibold text-gray-900">TwinDrives</span>
+            <span className="font-semibold text-foreground">TwinDrives</span>
           </div>
           <div className="hidden md:block" />
-          <NotificationBell />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <NotificationBell />
+          </div>
         </header>
         <div className="flex-1 overflow-y-auto p-6 md:p-8">{children}</div>
       </main>

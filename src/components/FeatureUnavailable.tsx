@@ -17,12 +17,12 @@ export function FeatureUnavailable({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-        {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+        {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
       </div>
-      <div className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center h-64 text-gray-400 px-6 text-center">
+      <div className="bg-card rounded-xl border border-border flex flex-col items-center justify-center h-64 text-muted-foreground px-6 text-center">
         <Wrench className="w-10 h-10 mb-3 opacity-30" />
-        <p className="text-sm font-medium text-gray-500">Coming soon</p>
+        <p className="text-sm font-medium text-muted-foreground">Coming soon</p>
         <p className="text-xs mt-1 max-w-sm">
           {note ?? "This feature isn't available yet."}
         </p>

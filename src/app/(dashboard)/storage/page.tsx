@@ -182,22 +182,22 @@ export default function StoragePage() {
       {/* header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Infrastructure</p>
-          <h1 className="text-2xl font-bold text-gray-900">Storage Monitoring</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Real-time platform storage across all tenants</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Infrastructure</p>
+          <h1 className="text-2xl font-bold text-foreground">Storage Monitoring</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Real-time platform storage across all tenants</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500">
-            <span className={`w-2 h-2 rounded-full ${paused ? "bg-gray-400" : "bg-green-500 animate-pulse"}`} />
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <span className={`w-2 h-2 rounded-full ${paused ? "bg-muted-foreground" : "bg-success animate-pulse"}`} />
             {paused ? "Paused" : "Live"}
           </span>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
             {INTERVALS.map((i) => (
               <button
                 key={i.ms}
                 onClick={() => setIntervalMs(i.ms)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition ${
-                  intervalMs === i.ms ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  intervalMs === i.ms ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {i.label}
@@ -206,7 +206,7 @@ export default function StoragePage() {
           </div>
           <button
             onClick={() => setPaused((p) => !p)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-input text-sm font-medium text-foreground hover:bg-accent/50"
           >
             {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
             {paused ? "Resume" : "Pause"}
@@ -217,24 +217,24 @@ export default function StoragePage() {
       {/* overview cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {overview.map((c) => (
-          <div key={c.label} className="bg-white rounded-xl border border-gray-200 p-4">
+          <div key={c.label} className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-500">{c.label}</span>
+              <span className="text-xs font-medium text-muted-foreground">{c.label}</span>
               <c.icon className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-xl font-bold text-gray-900 tabular-nums">{c.value}</p>
+            <p className="text-xl font-bold text-foreground tabular-nums">{c.value}</p>
           </div>
         ))}
       </div>
 
       {/* live throughput + live tiles */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
+        <div className="xl:col-span-2 bg-card rounded-xl border border-border p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Activity className="w-4 h-4 text-primary" /> Throughput (live)
             </h3>
-            <span className="text-xs text-gray-400">read vs write · MB/s</span>
+            <span className="text-xs text-muted-foreground">read vs write · MB/s</span>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={history} margin={{ left: -20, right: 8, top: 4 }}>
@@ -259,13 +259,13 @@ export default function StoragePage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Live metrics</h3>
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Live metrics</h3>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {liveTiles.map((t) => (
               <div key={t.label}>
-                <p className="text-xs text-gray-400">{t.label}</p>
-                <p className="text-sm font-semibold text-gray-900 tabular-nums">{t.value}</p>
+                <p className="text-xs text-muted-foreground">{t.label}</p>
+                <p className="text-sm font-semibold text-foreground tabular-nums">{t.value}</p>
               </div>
             ))}
           </div>
@@ -274,8 +274,8 @@ export default function StoragePage() {
 
       {/* usage over time + capacity donut */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Storage usage over time (30d)</h3>
+        <div className="xl:col-span-2 bg-card rounded-xl border border-border p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Storage usage over time (30d)</h3>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={usage} margin={{ left: -12, right: 8, top: 4 }}>
               <defs>
@@ -293,8 +293,8 @@ export default function StoragePage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Platform capacity</h3>
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Platform capacity</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={capacity} dataKey="value" nameKey="name" innerRadius={54} outerRadius={82} paddingAngle={2} stroke="#fff" strokeWidth={2}>
@@ -311,8 +311,8 @@ export default function StoragePage() {
 
       {/* top colleges + file types */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Top colleges by storage</h3>
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Top colleges by storage</h3>
           <ResponsiveContainer width="100%" height={Math.max(180, top.length * 34)}>
             <BarChart data={top} layout="vertical" margin={{ left: 20, right: 16 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
@@ -324,8 +324,8 @@ export default function StoragePage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">File type distribution</h3>
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">File type distribution</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={fileTypes} dataKey="gb" nameKey="type" outerRadius={82} stroke="#fff" strokeWidth={2}>
@@ -341,8 +341,8 @@ export default function StoragePage() {
       </div>
 
       {/* allocation vs usage */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4">Allocation vs usage by college</h3>
+      <div className="bg-card rounded-xl border border-border p-5">
+        <h3 className="text-sm font-semibold text-foreground mb-4">Allocation vs usage by college</h3>
         <ResponsiveContainer width="100%" height={Math.max(200, alloc.length * 40)}>
           <BarChart data={alloc} layout="vertical" margin={{ left: 20, right: 16 }} barSize={16}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
@@ -357,9 +357,9 @@ export default function StoragePage() {
       </div>
 
       {/* per-college table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-700">College storage</h3>
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+          <h3 className="text-sm font-semibold text-foreground">College storage</h3>
           <button
             onClick={() =>
               downloadCsv(
@@ -377,7 +377,7 @@ export default function StoragePage() {
                 rows as unknown as Record<string, unknown>[]
               )
             }
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-primary"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary"
           >
             <Download className="w-3.5 h-3.5" /> Export CSV
           </button>
@@ -385,7 +385,7 @@ export default function StoragePage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-gray-400 border-b border-gray-100">
+              <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground border-b border-border">
                 <th className="px-5 py-2.5 font-medium">College</th>
                 <th className="px-5 py-2.5 font-medium">Tenant</th>
                 <th className="px-5 py-2.5 font-medium">Usage</th>
@@ -394,24 +394,24 @@ export default function StoragePage() {
                 <th className="px-5 py-2.5 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {rows.map((r) => {
                 const meta = STORAGE_STATUS_META[r.status];
                 return (
-                  <tr key={r.collegeId} className="hover:bg-gray-50/60">
-                    <td className="px-5 py-3 font-medium text-gray-900">{r.name}</td>
-                    <td className="px-5 py-3 font-mono text-xs text-gray-400">{r.tenantId}</td>
+                  <tr key={r.collegeId} className="hover:bg-accent/50">
+                    <td className="px-5 py-3 font-medium text-foreground">{r.name}</td>
+                    <td className="px-5 py-3 font-mono text-xs text-muted-foreground">{r.tenantId}</td>
                     <td className="px-5 py-3 w-64">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                           <div className={`h-full rounded-full ${meta.bar}`} style={{ width: `${r.usagePct}%` }} />
                         </div>
-                        <span className="text-xs tabular-nums text-gray-500 w-24 shrink-0">
+                        <span className="text-xs tabular-nums text-muted-foreground w-24 shrink-0">
                           {r.usedGB}/{r.allocatedGB} GB
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-gray-600">
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
                       {r.fileCount.toLocaleString("en-IN")}
                     </td>
                     <td className="px-5 py-3">
@@ -437,27 +437,27 @@ export default function StoragePage() {
       </div>
 
       {/* alerts */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-orange-500" />
-          <h3 className="text-sm font-semibold text-gray-700">Storage alerts</h3>
-          <span className="text-xs text-gray-400">({alerts.length})</span>
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-warning-strong" />
+          <h3 className="text-sm font-semibold text-foreground">Storage alerts</h3>
+          <span className="text-xs text-muted-foreground">({alerts.length})</span>
         </div>
         {alerts.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-gray-400">No active alerts</div>
+          <div className="px-5 py-8 text-center text-sm text-muted-foreground">No active alerts</div>
         ) : (
-          <ul className="divide-y divide-gray-50">
+          <ul className="divide-y divide-border">
             {alerts.map((a) => {
               const meta = ALERT_SEVERITY_META[a.severity];
               return (
                 <li key={a.id} className="flex items-center gap-3 px-5 py-3">
                   <span className={`w-2 h-2 rounded-full shrink-0 ${meta.dot}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 truncate">{a.description}</p>
-                    <p className="text-xs text-gray-400">{a.collegeName} · {a.time.toLocaleString("en-IN")}</p>
+                    <p className="text-sm text-foreground truncate">{a.description}</p>
+                    <p className="text-xs text-muted-foreground">{a.collegeName} · {a.time.toLocaleString("en-IN")}</p>
                   </div>
                   <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${meta.badge}`}>{meta.label}</span>
-                  <span className="text-xs text-gray-400 w-24 text-right shrink-0">{a.state}</span>
+                  <span className="text-xs text-muted-foreground w-24 text-right shrink-0">{a.state}</span>
                 </li>
               );
             })}
@@ -466,17 +466,17 @@ export default function StoragePage() {
       </div>
 
       {/* logs */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-700">Storage logs</h3>
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-border">
+          <h3 className="text-sm font-semibold text-foreground">Storage logs</h3>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <input
                 value={logQuery}
                 onChange={(e) => setLogQuery(e.target.value)}
                 placeholder="Search logs…"
-                className="pl-8 pr-3 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 w-52"
+                className="pl-8 pr-3 py-1.5 border border-input rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 w-52"
               />
             </div>
             <button
@@ -498,7 +498,7 @@ export default function StoragePage() {
                   filteredLogs.map((l) => ({ ...l, timestamp: l.timestamp.toISOString() })) as Record<string, unknown>[]
                 )
               }
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-primary"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary"
             >
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
@@ -506,8 +506,8 @@ export default function StoragePage() {
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-white">
-              <tr className="text-left text-xs uppercase tracking-wide text-gray-400 border-b border-gray-100">
+            <thead className="sticky top-0 bg-card">
+              <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground border-b border-border">
                 <th className="px-5 py-2.5 font-medium">Time</th>
                 <th className="px-5 py-2.5 font-medium">College</th>
                 <th className="px-5 py-2.5 font-medium">User</th>
@@ -518,25 +518,25 @@ export default function StoragePage() {
                 <th className="px-5 py-2.5 font-medium">IP</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {filteredLogs.map((l) => (
-                <tr key={l.id} className="hover:bg-gray-50/60">
-                  <td className="px-5 py-2 text-xs text-gray-400 whitespace-nowrap">
+                <tr key={l.id} className="hover:bg-accent/50">
+                  <td className="px-5 py-2 text-xs text-muted-foreground whitespace-nowrap">
                     {l.timestamp.toLocaleTimeString("en-IN")}
                   </td>
-                  <td className="px-5 py-2 text-gray-700 whitespace-nowrap">{l.collegeName}</td>
-                  <td className="px-5 py-2 text-gray-500 font-mono text-xs whitespace-nowrap">{l.user}</td>
-                  <td className="px-5 py-2 text-gray-700 font-mono text-xs whitespace-nowrap">{l.fileName}</td>
-                  <td className="px-5 py-2 text-right tabular-nums text-gray-500">{l.sizeMB} MB</td>
-                  <td className="px-5 py-2 text-gray-600">{l.action}</td>
+                  <td className="px-5 py-2 text-foreground whitespace-nowrap">{l.collegeName}</td>
+                  <td className="px-5 py-2 text-muted-foreground font-mono text-xs whitespace-nowrap">{l.user}</td>
+                  <td className="px-5 py-2 text-foreground font-mono text-xs whitespace-nowrap">{l.fileName}</td>
+                  <td className="px-5 py-2 text-right tabular-nums text-muted-foreground">{l.sizeMB} MB</td>
+                  <td className="px-5 py-2 text-muted-foreground">{l.action}</td>
                   <td className="px-5 py-2">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                      l.status === "Success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                      l.status === "Success" ? "bg-success-subtle text-success" : "bg-destructive-subtle text-destructive"
                     }`}>
                       {l.status}
                     </span>
                   </td>
-                  <td className="px-5 py-2 font-mono text-xs text-gray-400">{l.ip}</td>
+                  <td className="px-5 py-2 font-mono text-xs text-muted-foreground">{l.ip}</td>
                 </tr>
               ))}
             </tbody>

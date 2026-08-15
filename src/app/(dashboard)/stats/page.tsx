@@ -44,15 +44,15 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className="bg-card rounded-xl border border-border p-5">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm font-medium text-gray-500">{label}</span>
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
         <div className="p-2 rounded-lg bg-primary/10">
           <Icon className="w-4 h-4 text-primary" />
         </div>
       </div>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+      <p className="text-3xl font-bold text-foreground">{value}</p>
+      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
     </div>
   );
 }
@@ -65,7 +65,7 @@ export default function StatsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
+      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
         Loading statistics…
       </div>
     );
@@ -86,8 +86,8 @@ export default function StatsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Platform Statistics</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Overview across all colleges</p>
+        <h1 className="text-2xl font-bold text-foreground">Platform Statistics</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Overview across all colleges</p>
       </div>
 
       <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
@@ -126,8 +126,8 @@ export default function StatsPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
             Colleges Onboarded (Monthly)
           </h3>
           <ResponsiveContainer width="100%" height={220}>
@@ -141,8 +141,8 @@ export default function StatsPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
             Placements (Monthly)
           </h3>
           <ResponsiveContainer width="100%" height={220}>

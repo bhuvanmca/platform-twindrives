@@ -59,25 +59,25 @@ export function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="relative p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition"
+        className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unread > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center">
+          <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white text-[10px] font-semibold flex items-center justify-center">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl border border-gray-200 shadow-lg z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-semibold text-gray-900">Notifications</p>
+        <div className="absolute right-0 mt-2 w-80 bg-card rounded-xl border border-border shadow-lg z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <p className="text-sm font-semibold text-foreground">Notifications</p>
             {notifications.length > 0 && (
               <button
                 onClick={markAll}
-                className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-primary"
+                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary"
               >
                 <CheckCheck className="w-3.5 h-3.5" /> Mark all read
               </button>
@@ -85,18 +85,18 @@ export function NotificationBell() {
           </div>
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-10 text-center text-sm text-gray-400">You&apos;re all caught up</div>
+              <div className="px-4 py-10 text-center text-sm text-muted-foreground">You&apos;re all caught up</div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-border">
                 {notifications.map((n) => {
                   const meta = NOTIF_SEVERITY_META[n.severity];
                   return (
                     <li key={n.id} className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-primary/[0.03]"}`}>
                       <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${meta.dot}`} />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{n.title}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{n.body}</p>
-                        <p className="text-[11px] text-gray-400 mt-1">{timeAgo(n.time)}</p>
+                        <p className="text-sm font-medium text-foreground">{n.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">{timeAgo(n.time)}</p>
                       </div>
                     </li>
                   );

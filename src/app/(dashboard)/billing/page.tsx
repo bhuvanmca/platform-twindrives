@@ -94,30 +94,30 @@ export default function BillingPage() {
 
   const cards = [
     { label: "Billed (current cycle)", value: inr(totals.billed), icon: IndianRupee, tint: "text-primary bg-primary/10" },
-    { label: "Collected", value: inr(totals.collected), icon: CheckCircle2, tint: "text-green-600 bg-green-100" },
-    { label: "Outstanding", value: inr(totals.outstanding), icon: Clock, tint: "text-orange-600 bg-orange-100" },
-    { label: "Overdue accounts", value: String(totals.overdue), icon: AlertTriangle, tint: "text-red-600 bg-red-100" },
+    { label: "Collected", value: inr(totals.collected), icon: CheckCircle2, tint: "text-success bg-success-subtle" },
+    { label: "Outstanding", value: inr(totals.outstanding), icon: Clock, tint: "text-warning-strong bg-warning-subtle" },
+    { label: "Overdue accounts", value: String(totals.overdue), icon: AlertTriangle, tint: "text-destructive bg-destructive-subtle" },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Billing &amp; Payments</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-2xl font-bold text-foreground">Billing &amp; Payments</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
           Subscriptions, invoices and payment status across all colleges
         </p>
       </div>
 
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {cards.map((c) => (
-          <div key={c.label} className="bg-white rounded-xl border border-gray-200 p-5">
+          <div key={c.label} className="bg-card rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-500">{c.label}</span>
+              <span className="text-sm font-medium text-muted-foreground">{c.label}</span>
               <div className={`p-2 rounded-lg ${c.tint}`}>
                 <c.icon className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{c.value}</p>
+            <p className="text-2xl font-bold text-foreground tabular-nums">{c.value}</p>
           </div>
         ))}
       </div>
@@ -125,23 +125,23 @@ export default function BillingPage() {
       {/* controls */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search colleges…"
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+            className="w-full pl-9 pr-4 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
           />
         </div>
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
           {STATUS_FILTERS.map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
                 statusFilter === s
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {s}
@@ -167,18 +167,18 @@ export default function BillingPage() {
               })) as unknown as Record<string, unknown>[]
             )
           }
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-sm font-medium text-foreground hover:bg-accent/50"
         >
           <Download className="w-4 h-4" /> Export
         </button>
       </div>
 
       {/* table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-gray-400 border-b border-gray-100">
+              <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground border-b border-border">
                 <th className="px-5 py-3 font-medium">College</th>
                 <th className="px-5 py-3 font-medium">Plan</th>
                 <th className="px-5 py-3 font-medium text-right">Users</th>
@@ -188,31 +188,31 @@ export default function BillingPage() {
                 <th className="px-5 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-12 text-center text-gray-400">
+                  <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground">
                     Loading…
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-12 text-center text-gray-400">
+                  <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground">
                     No matching invoices
                   </td>
                 </tr>
               ) : (
                 filtered.map(({ college, current, invoices }) => (
-                  <tr key={college.id} className="hover:bg-gray-50/60">
+                  <tr key={college.id} className="hover:bg-accent/50">
                     <td className="px-5 py-3">
-                      <p className="font-medium text-gray-900">{college.name}</p>
-                      <p className="text-xs text-gray-400 font-mono">{current.number}</p>
+                      <p className="font-medium text-foreground">{college.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{current.number}</p>
                     </td>
-                    <td className="px-5 py-3 text-gray-600">{current.planName}</td>
-                    <td className="px-5 py-3 text-right tabular-nums text-gray-600">
+                    <td className="px-5 py-3 text-muted-foreground">{current.planName}</td>
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
                       {current.licensedUsers}
                     </td>
-                    <td className="px-5 py-3 text-right tabular-nums font-medium text-gray-900">
+                    <td className="px-5 py-3 text-right tabular-nums font-medium text-foreground">
                       {inr(current.finalAmount)}
                     </td>
                     <td className="px-5 py-3">
@@ -222,14 +222,14 @@ export default function BillingPage() {
                         {current.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-500">{fmtDate(current.dueDate)}</td>
+                    <td className="px-5 py-3 text-muted-foreground">{fmtDate(current.dueDate)}</td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-end gap-1">
                         {current.status !== "Paid" && (
                           <button
                             onClick={() => payMutation.mutate(current.number)}
                             title="Mark as paid"
-                            className="p-1.5 rounded-md text-gray-400 hover:text-green-600 hover:bg-green-50"
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-success hover:bg-success-subtle"
                           >
                             <CheckCircle2 className="w-4 h-4" />
                           </button>
@@ -238,7 +238,7 @@ export default function BillingPage() {
                           <button
                             onClick={() => toast.success(`Reminder sent to ${college.name}`)}
                             title="Send reminder"
-                            className="p-1.5 rounded-md text-gray-400 hover:text-orange-600 hover:bg-orange-50"
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-warning-strong hover:bg-warning-subtle"
                           >
                             <BellRing className="w-4 h-4" />
                           </button>
@@ -246,14 +246,14 @@ export default function BillingPage() {
                         <button
                           onClick={() => openInvoicePdf(current)}
                           title="Download invoice (PDF)"
-                          className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10"
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10"
                         >
                           <Download className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setHistoryFor(college)}
                           title="Billing history"
-                          className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
                         >
                           <History className="w-4 h-4" />
                         </button>
@@ -290,26 +290,26 @@ function BillingHistoryDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl max-h-[85vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="relative w-full max-w-2xl bg-card rounded-2xl shadow-xl max-h-[85vh] flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div>
-            <h2 className="font-semibold text-gray-900">Billing history</h2>
-            <p className="text-xs text-gray-500">{college.name}</p>
+            <h2 className="font-semibold text-foreground">Billing history</h2>
+            <p className="text-xs text-muted-foreground">{college.name}</p>
           </div>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="overflow-y-auto divide-y divide-gray-50">
+        <div className="overflow-y-auto divide-y divide-border">
           {invoices.map((inv) => (
             <div key={inv.number} className="flex items-center gap-3 px-6 py-3">
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 font-mono">{inv.number}</p>
-                <p className="text-xs text-gray-400">
+                <p className="text-sm font-medium text-foreground font-mono">{inv.number}</p>
+                <p className="text-xs text-muted-foreground">
                   {fmtDate(inv.invoiceDate)} · {inv.planName} · {inv.licensedUsers} users
                 </p>
               </div>
-              <span className="text-sm font-medium text-gray-900 tabular-nums">
+              <span className="text-sm font-medium text-foreground tabular-nums">
                 {inr(inv.finalAmount)}
               </span>
               <span
@@ -320,7 +320,7 @@ function BillingHistoryDialog({
               <button
                 onClick={() => openInvoicePdf(inv)}
                 title="Download (PDF)"
-                className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10"
+                className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10"
               >
                 <Download className="w-4 h-4" />
               </button>

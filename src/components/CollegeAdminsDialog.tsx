@@ -88,15 +88,15 @@ export function CollegeAdminsDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Admins</h2>
-            <p className="text-xs text-gray-500">{college.name}</p>
+            <h2 className="text-lg font-semibold text-foreground">Admins</h2>
+            <p className="text-xs text-muted-foreground">{college.name}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
+            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -104,39 +104,39 @@ export function CollegeAdminsDialog({
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           {/* Existing staff */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
             {isLoading ? (
-              <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+              <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
                 Loading…
               </div>
             ) : admins.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-32 text-gray-400">
+              <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                 <Users className="w-8 h-8 mb-2 opacity-30" />
                 <p className="text-sm">No admins yet for this college</p>
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-muted/60 border-b border-border">
                   <tr>
-                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Role
                     </th>
                     <th className="px-4 py-2.5" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-border">
                   {admins.map((a) => (
-                    <tr key={a.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 font-medium text-gray-900">
+                    <tr key={a.id} className="hover:bg-accent/50 transition">
+                      <td className="px-4 py-3 font-medium text-foreground">
                         {a.name ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{a.email}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.email}</td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1.5 text-primary">
                           {a.role === "super_admin" ? (
@@ -156,7 +156,7 @@ export function CollegeAdminsDialog({
                               if (confirm(`Remove ${a.name ?? a.email}?`))
                                 deleteMutation.mutate(a.id);
                             }}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive-subtle rounded-lg transition"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -175,29 +175,29 @@ export function CollegeAdminsDialog({
               e.preventDefault();
               createMutation.mutate(form);
             }}
-            className="space-y-4 border-t border-gray-100 pt-5"
+            className="space-y-4 border-t border-border pt-5"
           >
-            <h3 className="text-sm font-semibold text-gray-700">Add an admin</h3>
+            <h3 className="text-sm font-semibold text-foreground">Add an admin</h3>
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+              <p className="text-sm text-destructive bg-destructive-subtle rounded-lg px-3 py-2">
                 {error}
               </p>
             )}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Full Name *
                 </label>
                 <input
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                  className="w-full px-3 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                   placeholder="Placement Officer"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Role *
                 </label>
                 <select
@@ -205,14 +205,14 @@ export function CollegeAdminsDialog({
                   onChange={(e) =>
                     setForm({ ...form, role: e.target.value as AdminFormData["role"] })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-white"
+                  className="w-full px-3 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-card"
                 >
                   <option value="admin">Admin</option>
                   <option value="super_admin">Super Admin</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Email *
                 </label>
                 <input
@@ -220,12 +220,12 @@ export function CollegeAdminsDialog({
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                  className="w-full px-3 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                   placeholder="placement@college.edu"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Temporary Password *
                 </label>
                 <input
@@ -234,7 +234,7 @@ export function CollegeAdminsDialog({
                   minLength={6}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                  className="w-full px-3 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                   placeholder="Min. 6 characters"
                 />
               </div>
