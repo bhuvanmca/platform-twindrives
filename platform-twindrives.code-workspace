@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "name": "Frontend — platform-twindrives",
+      "path": "."
+    },
+    {
+      "name": "Backend — api-twindrives",
+      "path": "../drives-application/api-twindrives"
+    }
+  ],
+  "settings": {
+    "git.autoRepositoryDetection": "subFolders"
+  }
+}
