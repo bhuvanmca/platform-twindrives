@@ -54,7 +54,7 @@ export default function BillingPage() {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "All">("All");
   const [historyFor, setHistoryFor] = useState<DemoCollege | null>(null);
 
-  const { data: colleges = [], isLoading } = useQuery({
+  const { data: colleges = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["colleges"],
     queryFn: () => api.get("/platform/colleges").then((r) => unwrap(r.data)),
   });
@@ -193,6 +193,13 @@ export default function BillingPage() {
                 <tr>
                   <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground">
                     Loading…
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={7} className="px-5 py-12 text-center text-destructive">
+                    <p>Could not load billing data.</p>
+                    <button onClick={() => refetch()} className="mt-2 text-primary hover:underline">Try again</button>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (

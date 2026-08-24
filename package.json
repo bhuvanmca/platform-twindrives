@@ -7,6 +7,8 @@
     "build": "next build && opennextjs-cloudflare build --skipNextBuild",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck",
     "pages:build": "npm run build",
     "pages:preview": "opennextjs-cloudflare preview",
     "pages:deploy": "node scripts/guard-windows-deploy.mjs && opennextjs-cloudflare deploy"

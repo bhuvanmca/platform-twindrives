@@ -25,7 +25,7 @@ function parseAction(action: string) {
 }
 
 export default function ActivityPage() {
-  const { data: entries = [], isLoading } = useQuery<AuditEntry[]>({
+  const { data: entries = [], isLoading, isError, refetch } = useQuery<AuditEntry[]>({
     queryKey: ["audit"],
     queryFn: () => api.get("/platform/audit").then((r) => r.data.entries ?? []),
   });
@@ -43,6 +43,11 @@ export default function ActivityPage() {
         {isLoading ? (
           <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
             Loading…
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center h-48 gap-2 text-destructive text-sm">
+            <p>Could not load platform activity.</p>
+            <button onClick={() => refetch()} className="text-primary hover:underline">Try again</button>
           </div>
         ) : entries.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">

@@ -52,7 +52,7 @@ export function CollegeAdminsDialog({
   const [error, setError] = useState("");
   const key = ["college-admins", college.id];
 
-  const { data: admins = [], isLoading } = useQuery<CollegeStaff[]>({
+  const { data: admins = [], isLoading, isError, refetch } = useQuery<CollegeStaff[]>({
     queryKey: key,
     queryFn: () =>
       api
@@ -108,6 +108,13 @@ export function CollegeAdminsDialog({
             {isLoading ? (
               <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
                 Loading…
+              </div>
+            ) : isError ? (
+              <div className="flex flex-col items-center justify-center h-32 gap-2 text-destructive text-sm">
+                <p>Could not load administrators.</p>
+                <button type="button" onClick={() => refetch()} className="text-primary hover:underline">
+                  Try again
+                </button>
               </div>
             ) : admins.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">

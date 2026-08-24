@@ -58,7 +58,7 @@ function StatCard({
 }
 
 export default function StatsPage() {
-  const { data: stats, isLoading } = useQuery<PlatformStats>({
+  const { data: stats, isLoading, isError, refetch } = useQuery<PlatformStats>({
     queryKey: ["platform-stats"],
     queryFn: () => api.get("/platform/stats").then((r) => r.data),
   });
@@ -67,6 +67,15 @@ export default function StatsPage() {
     return (
       <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
         Loading statistics…
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-2 text-destructive text-sm">
+        <p>Could not load platform statistics.</p>
+        <button onClick={() => refetch()} className="text-primary hover:underline">Try again</button>
       </div>
     );
   }
