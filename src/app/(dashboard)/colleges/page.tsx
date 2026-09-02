@@ -15,7 +15,15 @@ import {
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
-import { PLANS, inr } from "@/lib/demo";
+import {
+  PLANS,
+  inr,
+  setCollegeContact,
+  setStorageAllocation,
+  setStorageConfig,
+  setSubscriptionPricing,
+  type Subscription,
+} from "@/lib/demo";
 
 // The college admin app the platform owner is handed off into when opening a
 // college's dashboard. This must point at the CI-maintained admin worker (the
@@ -65,9 +73,16 @@ const emptyAdmin = {
   sendCreds: true,
   forceChange: true,
 };
+const BILLING_CYCLES: Subscription["billingCycle"][] = [
+  "Monthly",
+  "Quarterly",
+  "Half-Yearly",
+  "Yearly",
+];
+
 const emptySub = {
   planId: PLANS[0].id,
-  billingCycle: "Yearly",
+  billingCycle: "Yearly" as Subscription["billingCycle"],
   costPerUser: PLANS[0].costPerUser,
   maxUsers: 500,
   autoRenew: true,
@@ -194,8 +209,13 @@ function CollegesContent() {
     setForm(emptyForm);
   }
 
-  // Create the college for real, then (if provided) its first admin. Subscription
-  // and storage are captured as demo configuration.
+  // Create the college for real, then (if provided) its first admin.
+  //
+  // auth-service's College model has no columns for the contact block, the
+  // subscription or the storage quota, so those three sections are written to
+  // the demo store keyed by the new college id. They used to be collected by
+  // this form and then dropped on submit, which made the wizard quietly lie
+  // about what it had saved.
   async function onboard() {
     setCreating(true);
     try {
@@ -208,6 +228,22 @@ function CollegesContent() {
           .get("/platform/colleges")
           .then((r) => unwrapColleges(r.data));
         collegeId = list.find((c) => c.code === form.code.toUpperCase())?.id;
+      }
+      if (collegeId) {
+        setCollegeContact(collegeId, contact);
+        setSubscriptionPricing(collegeId, {
+          planId: sub.planId,
+          billingCycle: sub.billingCycle,
+          costPerUser: sub.costPerUser,
+          licensedUsers: sub.maxUsers,
+          autoRenew: sub.autoRenew,
+        });
+        setStorageAllocation(collegeId, store.allocatedGB);
+        setStorageConfig(collegeId, {
+          maxUploadMB: store.maxUploadMB,
+          warningPct: store.warningPct,
+          criticalPct: store.criticalPct,
+        });
       }
       if (collegeId && admin.email && admin.password) {
         try {
@@ -537,8 +573,8 @@ function CollegesContent() {
                       </div>
                       <div>
                         <Label>Billing cycle</Label>
-                        <select value={sub.billingCycle} onChange={(e) => setSub({ ...sub, billingCycle: e.target.value })} className={`${FIELD} bg-card`}>
-                          {["Monthly", "Quarterly", "Half-Yearly", "Yearly"].map((c) => (
+                        <select value={sub.billingCycle} onChange={(e) => setSub({ ...sub, billingCycle: e.target.value as Subscription["billingCycle"] })} className={`${FIELD} bg-card`}>
+                          {BILLING_CYCLES.map((c) => (
                             <option key={c} value={c}>{c}</option>
                           ))}
                         </select>

@@ -122,9 +122,13 @@ const REMAIN_BUCKETS = [120, 64, 41, 22, 9, 4, -6];
 
 export function getSubscription(c: DemoCollege): Subscription {
   const r = rngFor(c.id, 1);
-  const plan = PLANS[c.id % PLANS.length];
-  const cycle = pick(r, CYCLES);
   const ovr = subscriptionOverride(c.id);
+  // A college onboarded through the wizard carries the plan/cycle chosen there;
+  // everything else falls back to the deterministic seed.
+  const plan =
+    PLANS.find((p) => p.id === ovr?.planId) ?? PLANS[c.id % PLANS.length];
+  const cycle =
+    CYCLES.find((x) => x.name === ovr?.billingCycle) ?? pick(r, CYCLES);
   const licensedUsers =
     ovr?.licensedUsers ?? Math.max(25, between(r, 40, Math.min(plan.maxUsers, 1800)));
   const costPerUser = ovr?.costPerUser ?? plan.costPerUser;
@@ -155,18 +159,22 @@ export function getSubscription(c: DemoCollege): Subscription {
     endDate,
     nextRenewal,
     paymentDue,
-    autoRenew: r() > 0.35,
+    autoRenew: ovr?.autoRenew ?? r() > 0.35,
     totalAmount: licensedUsers * costPerUser,
     daysRemaining,
     status,
   };
 }
 
+// Badge palettes resolve through the design tokens in globals.css so every
+// status follows the theme. The four severities map onto the four status token
+// families (success → info → warning → destructive) rather than raw Tailwind
+// palette classes, which cannot follow dark mode.
 export const SUB_STATUS_META: Record<SubStatus, { label: string; dot: string; badge: string }> = {
-  active: { label: "Active", dot: "bg-green-500", badge: "bg-green-100 text-green-700" },
-  expiring: { label: "Expiring soon", dot: "bg-yellow-500", badge: "bg-yellow-100 text-yellow-700" },
-  due: { label: "Due soon", dot: "bg-orange-500", badge: "bg-orange-100 text-orange-700" },
-  expired: { label: "Expired", dot: "bg-red-500", badge: "bg-red-100 text-red-700" },
+  active: { label: "Active", dot: "bg-success", badge: "bg-success-subtle text-success" },
+  expiring: { label: "Expiring soon", dot: "bg-info", badge: "bg-info-subtle text-info" },
+  due: { label: "Due soon", dot: "bg-warning", badge: "bg-warning-subtle text-warning-strong" },
+  expired: { label: "Expired", dot: "bg-destructive", badge: "bg-destructive-subtle text-destructive" },
 };
 
 // ---- invoices --------------------------------------------------------------
@@ -270,11 +278,11 @@ function invoiceNo(collegeId: number, seq: number): string {
 }
 
 export const INVOICE_STATUS_META: Record<InvoiceStatus, string> = {
-  Paid: "bg-green-100 text-green-700",
-  Pending: "bg-blue-100 text-blue-700",
-  "Due Soon": "bg-orange-100 text-orange-700",
-  Overdue: "bg-red-100 text-red-700",
-  Cancelled: "bg-gray-100 text-gray-500",
+  Paid: "bg-success-subtle text-success",
+  Pending: "bg-info-subtle text-info",
+  "Due Soon": "bg-warning-subtle text-warning-strong",
+  Overdue: "bg-destructive-subtle text-destructive",
+  Cancelled: "bg-muted text-muted-foreground",
 };
 
 // ---- storage ---------------------------------------------------------------
@@ -302,14 +310,15 @@ const ALLOC_OPTIONS = [50, 100, 200, 500];
 export function getStorage(c: DemoCollege): StorageInfo {
   const r = rngFor(c.id, 3);
   const base = pick(r, ALLOC_OPTIONS);
+  const cfg = storageConfigOverride(c.id);
   const allocatedGB = storageOverride(c.id) ?? base;
   // usage percentage spread to show every health colour
   const pctBuckets = [22, 41, 58, 73, 88, 96, 34, 67];
   const usagePct = pctBuckets[c.id % pctBuckets.length];
   const usedGB = Math.round(allocatedGB * usagePct) / 100;
   const remainingGB = Math.round((allocatedGB - usedGB) * 100) / 100;
-  const warningPct = 70;
-  const criticalPct = 90;
+  const warningPct = cfg?.warningPct ?? 70;
+  const criticalPct = cfg?.criticalPct ?? 90;
   const status: StorageStatus =
     usagePct >= 100 ? "full" : usagePct >= criticalPct ? "critical" : usagePct >= warningPct ? "warning" : "healthy";
 
@@ -320,7 +329,7 @@ export function getStorage(c: DemoCollege): StorageInfo {
     usedGB,
     remainingGB,
     usagePct,
-    maxUploadMB: pick(r, [50, 100, 200]),
+    maxUploadMB: cfg?.maxUploadMB ?? pick(r, [50, 100, 200]),
     warningPct,
     criticalPct,
     fileCount: between(r, 800, 42000),
@@ -331,19 +340,43 @@ export function getStorage(c: DemoCollege): StorageInfo {
   };
 }
 
+// "full" is the one status with no status token of its own — it inverts the
+// foreground/background pair so it reads as the most severe step in both themes.
 export const STORAGE_STATUS_META: Record<StorageStatus, { label: string; dot: string; badge: string; bar: string }> = {
-  healthy: { label: "Healthy", dot: "bg-green-500", badge: "bg-green-100 text-green-700", bar: "bg-green-500" },
-  warning: { label: "Warning", dot: "bg-yellow-500", badge: "bg-yellow-100 text-yellow-700", bar: "bg-yellow-500" },
-  critical: { label: "Critical", dot: "bg-red-500", badge: "bg-red-100 text-red-700", bar: "bg-red-500" },
-  full: { label: "Full", dot: "bg-gray-800", badge: "bg-gray-800 text-white", bar: "bg-gray-800" },
+  healthy: { label: "Healthy", dot: "bg-success", badge: "bg-success-subtle text-success", bar: "bg-success" },
+  warning: { label: "Warning", dot: "bg-warning", badge: "bg-warning-subtle text-warning-strong", bar: "bg-warning" },
+  critical: { label: "Critical", dot: "bg-destructive", badge: "bg-destructive-subtle text-destructive", bar: "bg-destructive" },
+  full: { label: "Full", dot: "bg-foreground", badge: "bg-foreground text-background", bar: "bg-foreground" },
 };
 
 // ---- localStorage overrides ------------------------------------------------
 
+export interface CollegeContact {
+  contactPerson?: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface StorageConfig {
+  maxUploadMB?: number;
+  warningPct?: number;
+  criticalPct?: number;
+}
+
+export interface SubscriptionOverride {
+  costPerUser?: number;
+  licensedUsers?: number;
+  planId?: string;
+  billingCycle?: Subscription["billingCycle"];
+  autoRenew?: boolean;
+}
+
 interface Overrides {
   invoices?: Record<string, { status?: InvoiceStatus; lastPaymentDate?: string }>;
   storage?: Record<number, number>; // collegeId → allocatedGB
-  subscription?: Record<number, { costPerUser?: number; licensedUsers?: number }>;
+  storageConfig?: Record<number, StorageConfig>;
+  subscription?: Record<number, SubscriptionOverride>;
+  contact?: Record<number, CollegeContact>;
 }
 
 const KEY = "twindrives_demo_overrides";
@@ -399,17 +432,48 @@ export function setStorageAllocation(collegeId: number, gb: number) {
   writeOverrides(ov);
 }
 
-function subscriptionOverride(
-  collegeId: number
-): { costPerUser?: number; licensedUsers?: number } | undefined {
+function subscriptionOverride(collegeId: number): SubscriptionOverride | undefined {
   return readOverrides().subscription?.[collegeId];
+}
+
+function storageConfigOverride(collegeId: number): StorageConfig | undefined {
+  return readOverrides().storageConfig?.[collegeId];
+}
+
+// Upload/threshold configuration captured by the onboarding wizard.
+export function setStorageConfig(collegeId: number, patch: StorageConfig) {
+  const ov = readOverrides();
+  ov.storageConfig = ov.storageConfig || {};
+  ov.storageConfig[collegeId] = { ...ov.storageConfig[collegeId], ...patch };
+  writeOverrides(ov);
+}
+
+export function getCollegeContact(collegeId: number): CollegeContact | undefined {
+  const c = readOverrides().contact?.[collegeId];
+  if (!c) return undefined;
+  return c.contactPerson || c.phone || c.address ? c : undefined;
+}
+
+// The college contact block has no column in auth-service's College model, so
+// the wizard's values are kept here rather than silently discarded.
+export function setCollegeContact(collegeId: number, contact: CollegeContact) {
+  const trimmed: CollegeContact = {
+    contactPerson: contact.contactPerson?.trim() || undefined,
+    phone: contact.phone?.trim() || undefined,
+    address: contact.address?.trim() || undefined,
+  };
+  if (!trimmed.contactPerson && !trimmed.phone && !trimmed.address) return;
+  const ov = readOverrides();
+  ov.contact = ov.contact || {};
+  ov.contact[collegeId] = { ...ov.contact[collegeId], ...trimmed };
+  writeOverrides(ov);
 }
 
 // Set per-college pricing. Flows into the subscription widget and every invoice
 // (invoices are derived from the subscription), so billing totals update too.
 export function setSubscriptionPricing(
   collegeId: number,
-  patch: { costPerUser?: number; licensedUsers?: number }
+  patch: SubscriptionOverride
 ) {
   const ov = readOverrides();
   ov.subscription = ov.subscription || {};
@@ -597,9 +661,9 @@ export function getStorageAlerts(colleges: DemoCollege[]): StorageAlert[] {
 }
 
 export const ALERT_SEVERITY_META: Record<AlertSeverity, { label: string; badge: string; dot: string }> = {
-  info: { label: "Info", badge: "bg-blue-100 text-blue-700", dot: "bg-blue-500" },
-  warning: { label: "Warning", badge: "bg-yellow-100 text-yellow-700", dot: "bg-yellow-500" },
-  critical: { label: "Critical", badge: "bg-red-100 text-red-700", dot: "bg-red-500" },
+  info: { label: "Info", badge: "bg-info-subtle text-info", dot: "bg-info" },
+  warning: { label: "Warning", badge: "bg-warning-subtle text-warning-strong", dot: "bg-warning" },
+  critical: { label: "Critical", badge: "bg-destructive-subtle text-destructive", dot: "bg-destructive" },
 };
 
 // ---- logs ------------------------------------------------------------------
@@ -707,8 +771,8 @@ export function markNotificationsRead(ids: string[]) {
 }
 
 export const NOTIF_SEVERITY_META: Record<NotifSeverity, { dot: string; ring: string }> = {
-  info: { dot: "bg-blue-500", ring: "bg-blue-100 text-blue-600" },
-  success: { dot: "bg-green-500", ring: "bg-green-100 text-green-600" },
-  warning: { dot: "bg-yellow-500", ring: "bg-yellow-100 text-yellow-600" },
-  critical: { dot: "bg-red-500", ring: "bg-red-100 text-red-600" },
+  info: { dot: "bg-info", ring: "bg-info-subtle text-info" },
+  success: { dot: "bg-success", ring: "bg-success-subtle text-success" },
+  warning: { dot: "bg-warning", ring: "bg-warning-subtle text-warning-strong" },
+  critical: { dot: "bg-destructive", ring: "bg-destructive-subtle text-destructive" },
 };

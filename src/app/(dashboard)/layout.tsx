@@ -14,14 +14,18 @@ import {
   X,
   CreditCard,
   HardDrive,
+  UserCog,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import { clearSession, getToken } from "@/lib/session";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { href: "/colleges", label: "Colleges", icon: Building2 },
+  { href: "/admins", label: "Admin Users", icon: UserCog },
   { href: "/billing", label: "Billing", icon: CreditCard },
   { href: "/stats", label: "Statistics", icon: BarChart3 },
   { href: "/storage", label: "Storage", icon: HardDrive },
@@ -43,24 +47,36 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<PlatformUser | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("platform_token");
-    if (!token) {
+    if (!getToken()) {
       router.replace("/login");
       return;
     }
-    // Validate the session for real rather than trusting the token string. On a
-    // bad/expired token the api 401 interceptor clears it and redirects to /login.
+    // Validate the session for real rather than trusting the token string. A 401
+    // is handled by the api interceptor (refresh, then sign-out); anything else
+    // — the endpoint missing, the service down — is surfaced instead of being
+    // swallowed, which previously left the sidebar blank with no explanation.
     api
       .get("/platform/auth/me")
-      .then((r) => setUser(r.data))
-      .catch(() => {});
+      .then((r) => {
+        setUser(r.data);
+        setAuthError(null);
+      })
+      .catch((err) => {
+        if (err?.response?.status === 401) return;
+        setAuthError(
+          err?.response?.status
+            ? `Could not verify your session (HTTP ${err.response.status}).`
+            : "Could not reach the platform API to verify your session."
+        );
+      });
   }, [router]);
 
   function handleLogout() {
-    localStorage.removeItem("platform_token");
+    clearSession();
     router.push("/login");
   }
 
@@ -162,6 +178,15 @@ export default function DashboardLayout({
             <NotificationBell />
           </div>
         </header>
+        {authError && (
+          <div
+            role="status"
+            className="flex items-center gap-2 px-4 md:px-8 py-2 bg-warning-subtle text-warning-strong text-sm border-b border-border"
+          >
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{authError} Some data on this page may be unavailable.</span>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto p-6 md:p-8">{children}</div>
       </main>
     </div>

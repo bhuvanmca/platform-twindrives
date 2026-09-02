@@ -19,6 +19,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { api } from "@/lib/api";
+import { CHART, axisTick, tooltipProps } from "@/lib/chart";
 
 interface PlatformStats {
   total_colleges: number;
@@ -141,11 +142,11 @@ export default function StatsPage() {
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={s.colleges_monthly}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="colleges" fill="oklch(0.39 0.14 264)" radius={4} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
+              <XAxis dataKey="month" tick={axisTick()} axisLine={false} tickLine={false} />
+              <YAxis tick={axisTick()} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip {...tooltipProps} />
+              <Bar dataKey="colleges" fill={CHART.series[0]} radius={4} name="Colleges" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -156,11 +157,11 @@ export default function StatsPage() {
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={s.placements_monthly}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="placements" fill="oklch(0.6 0.18 264)" radius={4} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
+              <XAxis dataKey="month" tick={axisTick()} axisLine={false} tickLine={false} />
+              <YAxis tick={axisTick()} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip {...tooltipProps} />
+              <Bar dataKey="placements" fill={CHART.series[1]} radius={4} name="Placements" />
             </BarChart>
           </ResponsiveContainer>
         </div>

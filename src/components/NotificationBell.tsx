@@ -10,6 +10,7 @@ import {
   NOTIF_SEVERITY_META,
   type DemoCollege,
 } from "@/lib/demo";
+import { DemoBadge } from "@/components/DemoBadge";
 
 function unwrap(data: unknown): DemoCollege[] {
   if (Array.isArray(data)) return data as DemoCollege[];
@@ -72,8 +73,14 @@ export function NotificationBell() {
 
       {open && (
         <div className="absolute right-0 mt-2 w-80 bg-card rounded-xl border border-border shadow-lg z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <p className="text-sm font-semibold text-foreground">Notifications</p>
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border">
+            <div className="flex items-center gap-2 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Notifications</p>
+              <DemoBadge
+                label="Demo"
+                detail="Derived from the demo billing and storage data, not from a notifications service."
+              />
+            </div>
             {notifications.length > 0 && (
               <button
                 onClick={markAll}

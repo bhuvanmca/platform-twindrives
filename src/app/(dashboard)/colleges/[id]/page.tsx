@@ -19,6 +19,9 @@ import {
   Pencil,
   Check,
   X,
+  Phone,
+  MapPin,
+  UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -27,12 +30,14 @@ import { CollegeAdminsDialog } from "@/components/CollegeAdminsDialog";
 import {
   getSubscription,
   getStorage,
+  getCollegeContact,
   setSubscriptionPricing,
   inr,
   fmtDate,
   SUB_STATUS_META,
   STORAGE_STATUS_META,
 } from "@/lib/demo";
+import { DemoBadge } from "@/components/DemoBadge";
 
 interface College {
   id: number;
@@ -203,6 +208,8 @@ export default function CollegeDetailPage() {
         ))}
       </div>
 
+      <ContactCard college={college} />
+
       <div className="grid lg:grid-cols-2 gap-4">
         <SubscriptionWidget college={college} />
         <StorageWidget college={college} />
@@ -250,7 +257,7 @@ function SubscriptionWidget({ college }: { college: College }) {
     setEditing(false);
     // billing invoices derive from the subscription — refresh them too
     queryClient.invalidateQueries({ queryKey: ["colleges"] });
-    toast.success("Pricing updated");
+    toast.success("Pricing updated (demo — saved in this browser only)");
   }
 
   return (
@@ -261,6 +268,7 @@ function SubscriptionWidget({ college }: { college: College }) {
             <CreditCard className="w-4 h-4 text-primary" />
           </div>
           <h3 className="font-semibold text-foreground">Subscription</h3>
+          <DemoBadge label="Demo" />
         </div>
         <div className="flex items-center gap-2">
           {!editing && (
@@ -352,7 +360,7 @@ function SubscriptionWidget({ college }: { college: College }) {
           </dl>
 
           <button
-            onClick={() => toast.success(`${sub.plan.name} plan renewed for ${college.name}`)}
+            onClick={() => toast.success(`${sub.plan.name} plan renewed for ${college.name} (demo)`)}
             className="mt-5 w-full py-2 rounded-lg border border-input text-sm font-medium text-foreground hover:bg-accent/50 transition"
           >
             Renew subscription
@@ -374,6 +382,7 @@ function StorageWidget({ college }: { college: College }) {
             <HardDrive className="w-4 h-4 text-primary" />
           </div>
           <h3 className="font-semibold text-foreground">Storage</h3>
+          <DemoBadge label="Demo" />
         </div>
         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${meta.badge}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
@@ -396,6 +405,32 @@ function StorageWidget({ college }: { college: College }) {
         <Row icon={HardDrive} label="Max upload" value={`${s.maxUploadMB} MB`} />
         <Row icon={CalendarClock} label="Last upload" value={fmtDate(s.lastUpload)} />
         <Row icon={CalendarClock} label="Last backup" value={fmtDate(s.lastBackup)} />
+      </dl>
+    </div>
+  );
+}
+
+// The contact block captured by the onboarding wizard. auth-service has no
+// column for it, so it lives in the demo store — shown here so the values the
+// wizard collects are visible somewhere rather than write-only.
+function ContactCard({ college }: { college: College }) {
+  const contact = getCollegeContact(college.id);
+  if (!contact) return null;
+  return (
+    <div className="bg-card rounded-xl border border-border p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-2 rounded-lg bg-primary/10">
+          <UserRound className="w-4 h-4 text-primary" />
+        </div>
+        <h3 className="font-semibold text-foreground">Contact</h3>
+        <DemoBadge label="Demo" />
+      </div>
+      <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-3 text-sm">
+        {contact.contactPerson && (
+          <Row icon={UserRound} label="Contact person" value={contact.contactPerson} />
+        )}
+        {contact.phone && <Row icon={Phone} label="Phone" value={contact.phone} />}
+        {contact.address && <Row icon={MapPin} label="Address" value={contact.address} />}
       </dl>
     </div>
   );

@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, LayoutDashboard, ArrowRight } from "lucide-react";
+import { Clock, Eye, EyeOff, LayoutDashboard, ArrowRight } from "lucide-react";
 import { StudyScene } from "@/components/StudyScene";
+import { safeNext, setSession } from "@/lib/session";
+
+// The query string is external to React and cannot change without a full
+// navigation, so it is read through useSyncExternalStore rather than mirrored
+// into state in an effect — same pattern as ThemeProvider, and it hydrates
+// correctly: the server snapshot renders first, then React re-renders with the
+// real location.
+const neverChanges = () => () => {};
+const readSearch = () => window.location.search;
+const readServerSearch = () => "";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +22,12 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // useSearchParams() would push this statically prerendered page behind a
+  // Suspense boundary for no benefit; the location itself is enough.
+  const search = useSyncExternalStore(neverChanges, readSearch, readServerSearch);
+  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const expired = params.get("expired") === "1";
+  const next = safeNext(params.get("next"));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,8 +46,12 @@ export default function LoginPage() {
       // auth-service returns { error } on 4xx; keep `message` as a fallback in
       // case a future endpoint uses it.
       if (!res.ok) throw new Error(data.error || data.message || "Login failed");
-      localStorage.setItem("platform_token", data.token);
-      router.push("/colleges");
+      if (!data.token) throw new Error("Login succeeded but returned no token");
+      // Keep the refresh token when the service issues one — the api client
+      // uses it to renew an expired session instead of bouncing back here.
+      setSession({ token: data.token, refresh_token: data.refresh_token });
+      // Back to whatever the expired session interrupted.
+      router.push(next);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -155,6 +175,16 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {expired && !error && (
+              <p className="flex items-start gap-2 text-sm text-warning-strong bg-warning-subtle rounded-lg px-3 py-2">
+                <Clock className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>
+                  Your session expired. Sign in again and we&apos;ll take you
+                  back to where you were.
+                </span>
+              </p>
+            )}
 
             {error && (
               <p className="text-sm text-destructive bg-destructive-subtle rounded-lg px-3 py-2">

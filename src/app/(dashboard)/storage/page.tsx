@@ -49,12 +49,18 @@ import {
   type DemoCollege,
 } from "@/lib/demo";
 import { downloadCsv } from "@/lib/export";
+import { DemoBadge } from "@/components/DemoBadge";
+import {
+  CATEGORICAL,
+  CHART,
+  axisTick,
+  legendStyle,
+  tooltipProps,
+} from "@/lib/chart";
 
-const PRIMARY = "oklch(0.39 0.14 264)";
-const PRIMARY_LIGHT = "oklch(0.62 0.17 264)";
-// Fixed categorical order (identity, never cycled) for file-type slices.
-const CAT = ["#6366f1", "#14b8a6", "#f59e0b", "#f43f5e", "#8b5cf6", "#94a3b8"];
-const GRID = "#eef0f4";
+const PRIMARY = CHART.series[0];
+const PRIMARY_LIGHT = CHART.series[1];
+const WRITE = CHART.series[2];
 
 const INTERVALS = [
   { label: "5s", ms: 5000 },
@@ -129,7 +135,7 @@ export default function StoragePage() {
   const capacity = [
     { name: "Used", value: platform.usedGB, fill: PRIMARY },
     { name: "Allocated (free)", value: Math.max(0, platform.allocatedGB - platform.usedGB), fill: PRIMARY_LIGHT },
-    { name: "Unallocated", value: Math.max(0, platform.capacityGB - platform.allocatedGB), fill: "#e5e7eb" },
+    { name: "Unallocated", value: Math.max(0, platform.capacityGB - platform.allocatedGB), fill: CHART.neutral },
   ];
 
   const overview = [
@@ -163,7 +169,9 @@ export default function StoragePage() {
   function increaseStorage(collegeId: number, current: number, name: string) {
     setStorageAllocation(collegeId, current + 50);
     setVersion((v) => v + 1);
-    toast.success(`${name} storage increased to ${current + 50} GB`);
+    toast.success(
+      `${name} storage increased to ${current + 50} GB (demo — saved in this browser only)`
+    );
   }
 
   const filteredLogs = logs.filter((l) => {
@@ -183,13 +191,22 @@ export default function StoragePage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Infrastructure</p>
-          <h1 className="text-2xl font-bold text-foreground">Storage Monitoring</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Real-time platform storage across all tenants</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground">Storage Monitoring</h1>
+            <DemoBadge />
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Platform storage across all tenants — no storage backend exists yet,
+            so these figures are simulated
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <span
+            title="A simulated feed, not real telemetry — values are re-sampled on each tick."
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
+          >
             <span className={`w-2 h-2 rounded-full ${paused ? "bg-muted-foreground" : "bg-success animate-pulse"}`} />
-            {paused ? "Paused" : "Live"}
+            {paused ? "Paused" : "Simulated feed"}
           </span>
           <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
             {INTERVALS.map((i) => (
@@ -232,7 +249,7 @@ export default function StoragePage() {
         <div className="xl:col-span-2 bg-card rounded-xl border border-border p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Activity className="w-4 h-4 text-primary" /> Throughput (live)
+              <Activity className="w-4 h-4 text-primary" /> Throughput (simulated)
             </h3>
             <span className="text-xs text-muted-foreground">read vs write · MB/s</span>
           </div>
@@ -244,23 +261,29 @@ export default function StoragePage() {
                   <stop offset="100%" stopColor={PRIMARY} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gWrite" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#14b8a6" stopOpacity={0} />
+                  <stop offset="0%" stopColor={WRITE} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={WRITE} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
               <XAxis dataKey="t" tick={false} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip isAnimationActive={false} />
-              <Legend />
+              <YAxis tick={axisTick()} axisLine={false} tickLine={false} />
+              <Tooltip isAnimationActive={false} {...tooltipProps} />
+              <Legend wrapperStyle={legendStyle} />
               <Area type="monotone" dataKey="read" stroke={PRIMARY} strokeWidth={2} fill="url(#gRead)" isAnimationActive={false} name="Read" />
-              <Area type="monotone" dataKey="write" stroke="#14b8a6" strokeWidth={2} fill="url(#gWrite)" isAnimationActive={false} name="Write" />
+              <Area type="monotone" dataKey="write" stroke={WRITE} strokeWidth={2} fill="url(#gWrite)" isAnimationActive={false} name="Write" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         <div className="bg-card rounded-xl border border-border p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Live metrics</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground">Live metrics</h3>
+            <DemoBadge
+              label="Simulated"
+              detail="These counters are re-sampled from fixed baselines on every tick. They are not real telemetry."
+            />
+          </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {liveTiles.map((t) => (
               <div key={t.label}>
@@ -284,10 +307,10 @@ export default function StoragePage() {
                   <stop offset="100%" stopColor={PRIMARY} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
-              <XAxis dataKey="day" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} interval={4} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} />
+              <XAxis dataKey="day" tick={axisTick(10)} axisLine={false} tickLine={false} interval={4} />
+              <YAxis tick={axisTick()} axisLine={false} tickLine={false} />
+              <Tooltip {...tooltipProps} />
               <Area type="monotone" dataKey="used" stroke={PRIMARY} strokeWidth={2} fill="url(#gUsage)" name="Used (GB)" />
             </AreaChart>
           </ResponsiveContainer>
@@ -297,13 +320,13 @@ export default function StoragePage() {
           <h3 className="text-sm font-semibold text-foreground mb-4">Platform capacity</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={capacity} dataKey="value" nameKey="name" innerRadius={54} outerRadius={82} paddingAngle={2} stroke="#fff" strokeWidth={2}>
+              <Pie data={capacity} dataKey="value" nameKey="name" innerRadius={54} outerRadius={82} paddingAngle={2} stroke={CHART.slice} strokeWidth={2}>
                 {capacity.map((c, i) => (
                   <Cell key={i} fill={c.fill} />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+              <Tooltip {...tooltipProps} />
+              <Legend iconType="circle" wrapperStyle={legendStyle} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -315,10 +338,10 @@ export default function StoragePage() {
           <h3 className="text-sm font-semibold text-foreground mb-4">Top colleges by storage</h3>
           <ResponsiveContainer width="100%" height={Math.max(180, top.length * 34)}>
             <BarChart data={top} layout="vertical" margin={{ left: 20, right: 16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={110} />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} horizontal={false} />
+              <XAxis type="number" tick={axisTick()} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={axisTick()} axisLine={false} tickLine={false} width={110} />
+              <Tooltip {...tooltipProps} />
               <Bar dataKey="used" fill={PRIMARY} radius={4} name="Used (GB)" />
             </BarChart>
           </ResponsiveContainer>
@@ -328,13 +351,13 @@ export default function StoragePage() {
           <h3 className="text-sm font-semibold text-foreground mb-4">File type distribution</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={fileTypes} dataKey="gb" nameKey="type" outerRadius={82} stroke="#fff" strokeWidth={2}>
+              <Pie data={fileTypes} dataKey="gb" nameKey="type" outerRadius={82} stroke={CHART.slice} strokeWidth={2}>
                 {fileTypes.map((_, i) => (
-                  <Cell key={i} fill={CAT[i % CAT.length]} />
+                  <Cell key={i} fill={CATEGORICAL[i % CATEGORICAL.length]} />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+              <Tooltip {...tooltipProps} />
+              <Legend iconType="circle" wrapperStyle={legendStyle} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -345,13 +368,13 @@ export default function StoragePage() {
         <h3 className="text-sm font-semibold text-foreground mb-4">Allocation vs usage by college</h3>
         <ResponsiveContainer width="100%" height={Math.max(200, alloc.length * 40)}>
           <BarChart data={alloc} layout="vertical" margin={{ left: 20, right: 16 }} barSize={16}>
-            <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={110} />
-            <Tooltip />
-            <Legend />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} horizontal={false} />
+            <XAxis type="number" tick={axisTick()} axisLine={false} tickLine={false} />
+            <YAxis type="category" dataKey="name" tick={axisTick()} axisLine={false} tickLine={false} width={110} />
+            <Tooltip {...tooltipProps} />
+            <Legend wrapperStyle={legendStyle} />
             <Bar dataKey="used" stackId="a" fill={PRIMARY} name="Used (GB)" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="free" stackId="a" fill="#e5e7eb" name="Free (GB)" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="free" stackId="a" fill={CHART.neutral} name="Free (GB)" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

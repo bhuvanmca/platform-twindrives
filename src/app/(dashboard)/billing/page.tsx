@@ -26,6 +26,7 @@ import {
   type DemoCollege,
 } from "@/lib/demo";
 import { openInvoicePdf } from "@/lib/invoice";
+import { DemoBadge } from "@/components/DemoBadge";
 import { downloadCsv } from "@/lib/export";
 
 interface College {
@@ -88,7 +89,7 @@ export default function BillingPage() {
     mutationFn: async (number: string) => markInvoicePaid(number),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["colleges"] });
-      toast.success("Invoice marked as paid");
+      toast.success("Marked as paid (demo — saved in this browser only)");
     },
   });
 
@@ -102,9 +103,13 @@ export default function BillingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Billing &amp; Payments</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground">Billing &amp; Payments</h1>
+          <DemoBadge />
+        </div>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Subscriptions, invoices and payment status across all colleges
+          Subscriptions, invoices and payment status across all colleges — the
+          college list is live, every amount below is generated
         </p>
       </div>
 
